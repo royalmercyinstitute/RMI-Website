@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Royal Mercy Institute | Science & Technology</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN SYSTEM — RMI CHARCOAL + TEAL + WHITE
+═══════════════════════════════════════════════ */
+:root {
+  --charcoal:    #1c2028;
+  --charcoal-m:  #252b35;
+  --charcoal-l:  #2e3645;
+  --charcoal-ll: #3d4658;
+  --teal:        #40c4c8;
+  --teal-d:      #20949a;
+  --teal-g:      #6eddeb;
+  --teal-glow:   rgba(64,196,200,0.15);
+  --white:       #ffffff;
+  --off-white:   #e8eef2;
+  --silver:      #9aaab8;
+  --silver-d:    #607080;
+  --danger:      #e85040;
+  --success:     #22c55e;
+  --warning:     #f59e0b;
+  --font-head:   'Syne', sans-serif;
+  --font-body:   'DM Sans', sans-serif;
+  --radius:      12px;
+  --radius-lg:   20px;
+  --shadow:      0 8px 32px rgba(0,0,0,0.4);
+  --shadow-teal: 0 4px 24px rgba(64,196,200,0.2);
+  --transition:  all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--charcoal);
+  color: var(--off-white);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--charcoal); }
+::-webkit-scrollbar-thumb { background:var(--teal-d); border-radius:3px; }
+
+/* ─── NAVBAR ─────────────────────────────────── */
+#navbar {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  background: rgba(28,32,40,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(64,196,200,0.2);
+  padding: 0 2rem;
+  display: flex; align-items:center; justify-content:space-between;
+  height: 64px;
+  transition: var(--transition);
+}
+.nav-logo {
+  display:flex; align-items:center; gap:12px; text-decoration:none;
+}
+.nav-logo-hex {
+  width:38px; height:38px;
+  background: var(--teal-glow);
+  border: 2px solid var(--teal);
+  clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-head); font-weight:800; font-size:11px;
+  color:var(--teal); letter-spacing:1px;
+}
+.nav-logo-text { font-family:var(--font-head); font-weight:700; font-size:16px; color:var(--white); }
+.nav-logo-text span { color:var(--teal); }
+
+.nav-links { display:flex; align-items:center; gap:6px; }
+.nav-link {
+  padding:8px 16px; border-radius:8px; cursor:pointer;
+  font-size:14px; font-weight:500; color:var(--silver);
+  transition:var(--transition); border:none; background:none;
+  font-family:var(--font-body);
+}
+.nav-link:hover, .nav-link.active { color:var(--teal); background:var(--teal-glow); }
+
+.nav-auth { display:flex; align-items:center; gap:8px; }
+.btn-ghost {
+  padding:8px 20px; border-radius:8px; cursor:pointer;
+  font-size:13px; font-weight:500; color:var(--teal);
+  border: 1.5px solid var(--teal-d); background:transparent;
+  transition:var(--transition); font-family:var(--font-body);
+}
+.btn-ghost:hover { background:var(--teal-glow); }
+.btn-primary {
+  padding:8px 20px; border-radius:8px; cursor:pointer;
+  font-size:13px; font-weight:600;
+  background: linear-gradient(135deg,var(--teal-d),var(--teal));
+  color:var(--charcoal); border:none;
+  transition:var(--transition); font-family:var(--font-body);
+  box-shadow: var(--shadow-teal);
+}
+.btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 28px rgba(64,196,200,0.35); }
+.btn-danger {
+  padding:6px 14px; border-radius:6px; cursor:pointer;
+  font-size:12px; font-weight:600; color:var(--white);
+  background:var(--danger); border:none; transition:var(--transition);
+}
+.btn-danger:hover { opacity:0.85; }
+
+/* ─── PAGE SYSTEM ─────────────────────────────── */
+.page { display:none; min-height:100vh; padding-top:64px; }
+.page.active { display:block; }
+
+/* ─── HERO ─────────────────────────────────────── */
+#hero {
+  min-height: calc(100vh - 64px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:4rem 2rem;
+  position:relative; overflow:hidden;
+}
+.hero-bg {
+  position:absolute; inset:0; z-index:0;
+  background: radial-gradient(ellipse 60% 60% at 50% 40%, rgba(64,196,200,0.08) 0%, transparent 70%);
+}
+.hero-grid {
+  position:absolute; inset:0; z-index:0;
+  background-image:
+    linear-gradient(rgba(64,196,200,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(64,196,200,0.05) 1px, transparent 1px);
+  background-size:60px 60px;
+}
+.hero-content { position:relative; z-index:1; max-width:820px; }
+
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 16px; border-radius:100px;
+  background:var(--teal-glow); border:1px solid rgba(64,196,200,0.3);
+  font-size:13px; font-weight:500; color:var(--teal);
+  margin-bottom:1.5rem;
+  animation: fadeDown 0.6s ease both;
+}
+.hero-badge-dot { width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite; }
+
+.hero-title {
+  font-family:var(--font-head); font-size:clamp(2.8rem,6vw,5rem); font-weight:800;
+  line-height:1.05; color:var(--white); margin-bottom:1.5rem;
+  animation: fadeUp 0.7s 0.1s ease both;
+}
+.hero-title .teal { color:var(--teal); }
+.hero-title .outline { -webkit-text-stroke:2px var(--teal); color:transparent; }
+
+.hero-sub {
+  font-size:clamp(1rem,2vw,1.2rem); color:var(--silver); max-width:600px; margin:0 auto 2rem;
+  animation:fadeUp 0.7s 0.2s ease both;
+}
+.hero-slogan {
+  font-size:1rem; font-style:italic; color:var(--teal-g);
+  margin-bottom:2.5rem;
+  animation:fadeUp 0.7s 0.3s ease both;
+}
+
+.hero-ctas {
+  display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
+  animation:fadeUp 0.7s 0.4s ease both;
+}
+.btn-lg { padding:14px 36px; font-size:15px; font-weight:700; }
+
+.hero-stats {
+  display:flex; gap:3rem; justify-content:center; flex-wrap:wrap;
+  margin-top:4rem; padding-top:3rem;
+  border-top:1px solid rgba(64,196,200,0.15);
+  animation:fadeUp 0.7s 0.5s ease both;
+}
+.stat-item { text-align:center; }
+.stat-num {
+  font-family:var(--font-head); font-size:2.4rem; font-weight:800;
+  color:var(--teal); display:block; line-height:1;
+}
+.stat-label { font-size:12px; color:var(--silver); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+/* ─── SECTION LAYOUT ─────────────────────────── */
+.section { padding:5rem 2rem; max-width:1200px; margin:0 auto; }
+.section-header { text-align:center; margin-bottom:3rem; }
+.section-tag {
+  display:inline-block; padding:4px 14px; border-radius:100px;
+  background:var(--teal-glow); border:1px solid rgba(64,196,200,0.3);
+  font-size:12px; font-weight:600; color:var(--teal);
+  letter-spacing:1px; text-transform:uppercase; margin-bottom:1rem;
+}
+.section-title {
+  font-family:var(--font-head); font-size:clamp(1.8rem,4vw,2.8rem);
+  font-weight:800; color:var(--white); margin-bottom:1rem;
+}
+.section-sub { color:var(--silver); max-width:560px; margin:0 auto; }
+
+/* ─── CARDS ──────────────────────────────────── */
+.grid-3 { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1.5rem; }
+.grid-2 { display:grid; grid-template-columns:repeat(auto-fill,minmax(440px,1fr)); gap:1.5rem; }
+
+.card {
+  background:var(--charcoal-m); border:1px solid rgba(64,196,200,0.12);
+  border-radius:var(--radius-lg); padding:1.75rem;
+  transition:var(--transition); position:relative; overflow:hidden;
+}
+.card:hover { border-color:rgba(64,196,200,0.35); transform:translateY(-3px); box-shadow:var(--shadow-teal); }
+.card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,var(--teal-d),var(--teal));
+  opacity:0; transition:var(--transition);
+}
+.card:hover::before { opacity:1; }
+
+.card-badge {
+  display:inline-block; padding:3px 10px; border-radius:6px;
+  font-size:11px; font-weight:700; letter-spacing:0.5px; margin-bottom:1rem;
+  background:var(--teal-glow); color:var(--teal);
+}
+.card-badge.beginner { background:rgba(34,197,94,0.15); color:var(--success); }
+.card-badge.intermediate { background:rgba(245,158,11,0.15); color:var(--warning); }
+.card-badge.advanced { background:rgba(232,80,64,0.15); color:var(--danger); }
+
+.card-title { font-family:var(--font-head); font-size:1.15rem; font-weight:700; color:var(--white); margin-bottom:0.5rem; }
+.card-desc { font-size:0.875rem; color:var(--silver); line-height:1.6; margin-bottom:1.25rem; }
+.card-meta { display:flex; gap:1rem; flex-wrap:wrap; font-size:12px; color:var(--silver-d); }
+.card-meta span { display:flex; align-items:center; gap:4px; }
+
+/* ─── FORMS ──────────────────────────────────── */
+.form-container {
+  background:var(--charcoal-m); border:1px solid rgba(64,196,200,0.15);
+  border-radius:var(--radius-lg); padding:2.5rem; max-width:480px; margin:0 auto;
+}
+.form-title { font-family:var(--font-head); font-size:1.6rem; font-weight:800; color:var(--white); margin-bottom:0.25rem; }
+.form-sub { color:var(--silver); font-size:0.9rem; margin-bottom:2rem; }
+.form-group { margin-bottom:1.25rem; }
+.form-label { display:block; font-size:13px; font-weight:500; color:var(--off-white); margin-bottom:6px; }
+.form-input {
+  width:100%; padding:12px 16px; border-radius:10px;
+  background:var(--charcoal-l); border:1.5px solid rgba(64,196,200,0.15);
+  color:var(--off-white); font-size:14px; font-family:var(--font-body);
+  transition:var(--transition); outline:none;
+}
+.form-input:focus { border-color:var(--teal); background:var(--charcoal-ll); box-shadow:0 0 0 3px rgba(64,196,200,0.1); }
+.form-input::placeholder { color:var(--silver-d); }
+select.form-input { cursor:pointer; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+.form-error { color:var(--danger); font-size:12px; margin-top:4px; }
+.form-success { color:var(--success); font-size:12px; margin-top:4px; }
+
+.alert {
+  padding:12px 16px; border-radius:10px; font-size:13px; margin-bottom:1rem;
+  border:1px solid;
+}
+.alert-error { background:rgba(232,80,64,0.1); border-color:rgba(232,80,64,0.3); color:#f87171; }
+.alert-success { background:rgba(34,197,94,0.1); border-color:rgba(34,197,94,0.3); color:#4ade80; }
+
+/* ─── TABS ────────────────────────────────────── */
+.tabs { display:flex; gap:8px; padding:4px; background:var(--charcoal-m); border-radius:12px; margin-bottom:2rem; border:1px solid rgba(64,196,200,0.1); }
+.tab {
+  flex:1; padding:10px 20px; border-radius:10px; cursor:pointer;
+  font-size:14px; font-weight:500; color:var(--silver);
+  border:none; background:transparent; transition:var(--transition);
+  font-family:var(--font-body); text-align:center;
+}
+.tab.active { background:linear-gradient(135deg,var(--teal-d),var(--teal)); color:var(--charcoal); font-weight:700; }
+.tab-content { display:none; }
+.tab-content.active { display:block; animation:fadeUp 0.3s ease; }
+
+/* ─── DASHBOARD ──────────────────────────────── */
+.dashboard-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:2rem; }
+.dash-card {
+  background:var(--charcoal-m); border:1px solid rgba(64,196,200,0.12);
+  border-radius:var(--radius); padding:1.5rem; text-align:center;
+}
+.dash-num { font-family:var(--font-head); font-size:2rem; font-weight:800; color:var(--teal); }
+.dash-label { font-size:12px; color:var(--silver); margin-top:4px; text-transform:uppercase; letter-spacing:0.8px; }
+
+/* ─── CHAT / WEBSOCKET ───────────────────────── */
+#chat-container {
+  display:grid; grid-template-columns:240px 1fr; gap:0; height:520px;
+  background:var(--charcoal-m); border:1px solid rgba(64,196,200,0.15);
+  border-radius:var(--radius-lg); overflow:hidden;
+}
+.chat-sidebar {
+  background:var(--charcoal); border-right:1px solid rgba(64,196,200,0.1);
+  padding:1.5rem 1rem;
+}
+.chat-sidebar-title { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--silver-d); margin-bottom:1rem; }
+.chat-room {
+  padding:10px 12px; border-radius:8px; cursor:pointer;
+  font-size:13px; color:var(--silver); transition:var(--transition);
+  display:flex; align-items:center; gap:8px; margin-bottom:4px;
+}
+.chat-room:hover { background:var(--charcoal-l); color:var(--off-white); }
+.chat-room.active { background:var(--teal-glow); color:var(--teal); border-left:3px solid var(--teal); }
+.chat-room-dot { width:8px;height:8px;border-radius:50%;background:var(--success); }
+.online-count { font-size:11px; color:var(--success); margin-top:1rem; padding:8px 12px; background:rgba(34,197,94,0.08); border-radius:8px; }
+
+.chat-main { display:flex; flex-direction:column; }
+.chat-header {
+  padding:1rem 1.5rem; border-bottom:1px solid rgba(64,196,200,0.1);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.chat-header-title { font-family:var(--font-head); font-weight:700; font-size:1rem; color:var(--white); }
+.chat-header-sub { font-size:12px; color:var(--silver); }
+.chat-status { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--success); }
+.chat-status-dot { width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s infinite; }
+
+#chat-messages {
+  flex:1; overflow-y:auto; padding:1rem 1.5rem;
+  display:flex; flex-direction:column; gap:12px;
+}
+.chat-msg { display:flex; gap:10px; align-items:flex-start; animation:fadeUp 0.2s ease; }
+.chat-msg.own { flex-direction:row-reverse; }
+.chat-avatar {
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--charcoal);
+}
+.chat-bubble {
+  max-width:70%; padding:10px 14px; border-radius:12px;
+  background:var(--charcoal-l); color:var(--off-white); font-size:13px;
+}
+.chat-msg.own .chat-bubble { background:var(--teal-d); color:var(--charcoal); border-radius:12px 4px 12px 12px; }
+.chat-bubble-name { font-size:11px; color:var(--teal); font-weight:600; margin-bottom:2px; }
+.chat-bubble-time { font-size:10px; color:var(--silver-d); margin-top:4px; }
+
+.chat-system { text-align:center; font-size:12px; color:var(--silver-d); padding:4px 0; }
+
+.chat-input-area {
+  padding:1rem 1.5rem; border-top:1px solid rgba(64,196,200,0.1);
+  display:flex; gap:10px; align-items:center;
+}
+#chat-input {
+  flex:1; padding:10px 14px; border-radius:10px;
+  background:var(--charcoal-l); border:1.5px solid rgba(64,196,200,0.15);
+  color:var(--off-white); font-size:13px; font-family:var(--font-body);
+  outline:none; transition:var(--transition);
+}
+#chat-input:focus { border-color:var(--teal); }
+.send-btn {
+  width:40px;height:40px;border-radius:10px;cursor:pointer;
+  background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  border:none; display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);
+}
+.send-btn:hover { transform:scale(1.05); }
+
+/* ─── API TESTER (Level 1 feature) ──────────── */
+.api-tester {
+  background:var(--charcoal); border:1px solid rgba(64,196,200,0.15);
+  border-radius:var(--radius-lg); overflow:hidden;
+}
+.api-tester-header {
+  padding:1rem 1.5rem; background:var(--charcoal-m);
+  border-bottom:1px solid rgba(64,196,200,0.1);
+  display:flex; align-items:center; gap:12px;
+}
+.method-badge {
+  padding:4px 10px; border-radius:6px; font-size:12px; font-weight:700; font-family:var(--font-head);
+}
+.method-get { background:rgba(34,197,94,0.15); color:var(--success); }
+.method-post { background:rgba(245,158,11,0.15); color:var(--warning); }
+.method-put { background:rgba(64,196,200,0.15); color:var(--teal); }
+.method-delete { background:rgba(232,80,64,0.15); color:var(--danger); }
+.api-url { font-family:monospace; font-size:13px; color:var(--off-white); }
+.api-response {
+  padding:1.5rem; font-family:monospace; font-size:12px;
+  color:var(--teal-g); white-space:pre-wrap; word-break:break-all;
+  max-height:200px; overflow-y:auto; line-height:1.7;
+}
+
+/* ─── TABLE ──────────────────────────────────── */
+.data-table { width:100%; border-collapse:collapse; font-size:13px; }
+.data-table th {
+  padding:12px 16px; text-align:left; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.8px; color:var(--silver-d);
+  border-bottom:1px solid rgba(64,196,200,0.1); background:var(--charcoal);
+}
+.data-table td { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--off-white); }
+.data-table tr:hover td { background:rgba(64,196,200,0.03); }
+.data-table-wrap { background:var(--charcoal-m); border:1px solid rgba(64,196,200,0.1); border-radius:var(--radius-lg); overflow:hidden; }
+
+/* ─── MODAL ──────────────────────────────────── */
+.modal-overlay {
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;
+  display:flex;align-items:center;justify-content:center;padding:2rem;
+  animation:fadeIn 0.2s ease;
+}
+.modal-overlay.hidden { display:none; }
+.modal {
+  background:var(--charcoal-m);border:1px solid rgba(64,196,200,0.2);
+  border-radius:var(--radius-lg);padding:2.5rem;max-width:500px;width:100%;
+  animation:scaleIn 0.25s ease;
+}
+.modal-title { font-family:var(--font-head);font-size:1.4rem;font-weight:800;color:var(--white);margin-bottom:0.25rem; }
+.modal-sub { color:var(--silver);font-size:0.875rem;margin-bottom:2rem; }
+.modal-actions { display:flex;gap:10px;justify-content:flex-end;margin-top:1.5rem; }
+
+/* ─── FILTER BAR ─────────────────────────────── */
+.filter-bar {
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:2rem;
+}
+.filter-btn {
+  padding:8px 18px;border-radius:100px;cursor:pointer;font-size:13px;
+  font-weight:500;color:var(--silver);border:1px solid rgba(64,196,200,0.15);
+  background:var(--charcoal-m);transition:var(--transition);font-family:var(--font-body);
+}
+.filter-btn:hover,.filter-btn.active { background:var(--teal-glow);border-color:var(--teal);color:var(--teal); }
+.search-box {
+  flex:1;min-width:200px;max-width:300px;padding:8px 14px;
+  border-radius:100px;background:var(--charcoal-m);
+  border:1px solid rgba(64,196,200,0.15);color:var(--off-white);
+  font-size:13px;font-family:var(--font-body);outline:none;transition:var(--transition);
+}
+.search-box:focus { border-color:var(--teal);box-shadow:0 0 0 3px rgba(64,196,200,0.1); }
+
+/* ─── FEATURES SECTION ───────────────────────── */
+.feature-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.5rem; }
+.feature-card {
+  padding:2rem; border-radius:var(--radius-lg);
+  background:var(--charcoal-m); border:1px solid rgba(64,196,200,0.1);
+  transition:var(--transition);
+}
+.feature-card:hover { border-color:rgba(64,196,200,0.3); transform:translateY(-4px); }
+.feature-icon {
+  width:52px;height:52px;border-radius:14px;margin-bottom:1.25rem;
+  background:var(--teal-glow);border:1px solid rgba(64,196,200,0.25);
+  display:flex;align-items:center;justify-content:center;font-size:1.5rem;
+}
+.feature-title { font-family:var(--font-head);font-size:1.05rem;font-weight:700;color:var(--white);margin-bottom:0.5rem; }
+.feature-desc { font-size:0.875rem;color:var(--silver);line-height:1.6; }
+
+/* ─── EMPATHY CANVAS SECTION ─────────────────── */
+.empathy-grid {
+  display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+}
+.empathy-card {
+  padding:1.5rem;border-radius:var(--radius);background:var(--charcoal-m);
+  border-left:4px solid var(--teal);
+}
+.empathy-card.see { border-color:var(--teal); }
+.empathy-card.feel { border-color:#a78bfa; }
+.empathy-card.say { border-color:var(--warning); }
+.empathy-card.pain { border-color:var(--danger); }
+.empathy-card.gain { border-color:var(--success); }
+.empathy-title { font-family:var(--font-head);font-size:0.9rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem; }
+.empathy-card.see .empathy-title { color:var(--teal); }
+.empathy-card.feel .empathy-title { color:#a78bfa; }
+.empathy-card.say .empathy-title { color:var(--warning); }
+.empathy-card.pain .empathy-title { color:var(--danger); }
+.empathy-card.gain .empathy-title { color:var(--success); }
+.empathy-list { list-style:none;padding:0; }
+.empathy-list li { font-size:13px;color:var(--silver);padding:4px 0;display:flex;gap:6px;align-items:flex-start; }
+.empathy-list li::before { content:'→';color:var(--teal-d);flex-shrink:0; }
+
+/* ─── FOOTER ─────────────────────────────────── */
+footer {
+  background:var(--charcoal);border-top:1px solid rgba(64,196,200,0.1);
+  padding:3rem 2rem 2rem;margin-top:4rem;
+}
+.footer-inner { max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem; }
+.footer-brand { font-family:var(--font-head);font-size:1.2rem;font-weight:800;color:var(--white);margin-bottom:0.75rem; }
+.footer-brand span { color:var(--teal); }
+.footer-desc { font-size:13px;color:var(--silver);line-height:1.7;margin-bottom:1rem; }
+.footer-slogan { font-size:12px;font-style:italic;color:var(--teal-g); }
+.footer-col-title { font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--off-white);margin-bottom:1rem; }
+.footer-link { display:block;font-size:13px;color:var(--silver);text-decoration:none;padding:4px 0;transition:var(--transition);cursor:pointer; }
+.footer-link:hover { color:var(--teal); }
+.footer-bottom { max-width:1200px;margin:2rem auto 0;padding-top:1.5rem;border-top:1px solid rgba(64,196,200,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem; }
+.footer-copy { font-size:12px;color:var(--silver-d); }
+
+/* ─── LOADING SPINNER ────────────────────────── */
+.spinner { width:32px;height:32px;border:3px solid rgba(64,196,200,0.2);border-top-color:var(--teal);border-radius:50%;animation:spin 0.7s linear infinite;margin:2rem auto; }
+.loading-state { text-align:center;padding:3rem;color:var(--silver); }
+
+/* ─── USER MENU ──────────────────────────────── */
+.user-menu { position:relative;display:flex;align-items:center;gap:10px; }
+.user-avatar {
+  width:36px;height:36px;border-radius:50%;cursor:pointer;
+  background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--charcoal);border:2px solid rgba(64,196,200,0.3);
+}
+.user-name { font-size:13px;font-weight:500;color:var(--off-white); }
+.user-role { font-size:11px;color:var(--teal); }
+
+/* ─── PROGRESS BAR ───────────────────────────── */
+.progress-bar { height:4px;background:var(--charcoal-l);border-radius:2px;overflow:hidden;margin-top:8px; }
+.progress-fill { height:100%;background:linear-gradient(90deg,var(--teal-d),var(--teal));border-radius:2px;transition:width 0.6s ease; }
+
+/* ─── ANIMATIONS ─────────────────────────────── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);} }
+@keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
+@keyframes scaleIn { from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);} }
+@keyframes spin { to{transform:rotate(360deg);} }
+@keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.4;} }
+@keyframes slideIn { from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;} }
+
+/* ─── TOAST ──────────────────────────────────── */
+#toast-container { position:fixed;bottom:2rem;right:2rem;z-index:9999;display:flex;flex-direction:column;gap:10px; }
+.toast {
+  padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;
+  min-width:260px;max-width:360px;animation:slideIn 0.3s ease;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+.toast-success { background:#14532d;border:1px solid rgba(34,197,94,0.3);color:#86efac; }
+.toast-error { background:#450a0a;border:1px solid rgba(232,80,64,0.3);color:#fca5a5; }
+.toast-info { background:rgba(64,196,200,0.1);border:1px solid rgba(64,196,200,0.3);color:var(--teal-g); }
+
+/* ─── ENROL BUTTON ───────────────────────────── */
+.enrol-btn {
+  width:100%;padding:10px;border-radius:10px;cursor:pointer;
+  font-size:13px;font-weight:700;font-family:var(--font-body);
+  background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  color:var(--charcoal);border:none;transition:var(--transition);
+  margin-top:auto;
+}
+.enrol-btn:hover { transform:translateY(-1px);box-shadow:var(--shadow-teal); }
+.enrol-btn.enrolled { background:rgba(34,197,94,0.15);color:var(--success);border:1px solid rgba(34,197,94,0.3); }
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media(max-width:768px){
+  .nav-links { display:none; }
+  .footer-inner { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+  #chat-container { grid-template-columns:1fr; height:600px; }
+  .chat-sidebar { display:none; }
+  .empathy-grid { grid-template-columns:1fr; }
+  .hero-stats { gap:1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ NAVBAR ════════════ -->
+<nav id="navbar">
+  <a class="nav-logo" onclick="navigate('home')" style="cursor:pointer">
+    <div class="nav-logo-hex">RMI</div>
+    <span class="nav-logo-text">Royal <span>Mercy</span> Institute</span>
+  </a>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="navigate('home')">Home</button>
+    <button class="nav-link" onclick="navigate('courses')">Courses</button>
+    <button class="nav-link" onclick="navigate('community')">Community</button>
+    <button class="nav-link" onclick="navigate('about')">About</button>
+    <button class="nav-link" onclick="navigate('api-demo')">API Demo</button>
+  </div>
+  <div class="nav-auth" id="nav-auth">
+    <button class="btn-ghost" onclick="openModal('login-modal')">Sign In</button>
+    <button class="btn-primary" onclick="openModal('signup-modal')">Join Free</button>
+  </div>
+</nav>
+
+<!-- ════════════ PAGES ════════════ -->
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="hero-badge"><span class="hero-badge-dot"></span> SDG 4 · Quality Education · South Africa</div>
+      <h1 class="hero-title">
+        Empowering <span class="teal">Innovation</span><br/>
+        for <span class="outline">Disadvantaged</span> Communities
+      </h1>
+      <p class="hero-sub">Affordable, locally-relevant science & technology education for young people aged 10–25 across South Africa's townships and rural areas.</p>
+      <p class="hero-slogan">"You Perceive It Possible; You Make It Possible"</p>
+      <div class="hero-ctas">
+        <button class="btn-primary btn-lg" onclick="navigate('courses')">Explore Courses</button>
+        <button class="btn-ghost btn-lg" onclick="navigate('about')">Our Mission</button>
+      </div>
+      <div class="hero-stats" id="hero-stats">
+        <div class="stat-item"><span class="stat-num" id="stat-courses">6</span><span class="stat-label">Courses</span></div>
+        <div class="stat-item"><span class="stat-num" id="stat-learners">5+</span><span class="stat-label">Learners Enrolled</span></div>
+        <div class="stat-item"><span class="stat-num">2020</span><span class="stat-label">Established</span></div>
+        <div class="stat-item"><span class="stat-num">Affordable</span><span class="stat-label">Always</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">What We Offer</div>
+      <h2 class="section-title">Built for <span style="color:var(--teal)">Township Innovation</span></h2>
+      <p class="section-sub">Everything you need to break into the digital economy — completely affordable.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">📱</div><div class="feature-title">Mobile-First App</div><div class="feature-desc">Low-data optimised FlutterFlow app. Learn anywhere, anytime — even with limited connectivity.</div></div>
+      <div class="feature-card"><div class="feature-icon">🎓</div><div class="feature-title">STEM Tutorials</div><div class="feature-desc">Curriculum-aligned tutorials built for South African learners from Grade 5 through to tertiary level.</div></div>
+      <div class="feature-card"><div class="feature-icon">🚀</div><div class="feature-title">Innovation Hub</div><div class="feature-desc">Entrepreneurship resources, problem-solving frameworks, and startup guidance for township youth.</div></div>
+      <div class="feature-card"><div class="feature-icon">🤝</div><div class="feature-title">Mentorship Network</div><div class="feature-desc">Connect with STEM professionals who look like you. Real mentors. Real careers. Real representation.</div></div>
+      <div class="feature-card"><div class="feature-icon">💻</div><div class="feature-title">Live Coding Labs</div><div class="feature-desc">Hands-on coding exercises, projects, and peer reviews to build your portfolio from scratch.</div></div>
+      <div class="feature-card"><div class="feature-icon">🌍</div><div class="feature-title">Community Platform</div><div class="feature-desc">Real-time study groups, peer support, and collaboration rooms for South African learners.</div></div>
+    </div>
+  </div>
+
+  <!-- Featured Courses Preview -->
+  <div style="background:var(--charcoal-m);padding:5rem 0;border-top:1px solid rgba(64,196,200,0.08);">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-tag">Featured Courses</div>
+        <h2 class="section-title">Start Learning <span style="color:var(--teal)">Today</span></h2>
+      </div>
+      <div class="grid-3" id="home-courses-grid">
+        <div class="loading-state"><div class="spinner"></div>Loading courses...</div>
+      </div>
+      <div style="text-align:center;margin-top:2rem">
+        <button class="btn-primary" onclick="navigate('courses')">View All Courses →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empathy Canvas -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">Research & Empathy</div>
+      <h2 class="section-title">We Understand <span style="color:var(--teal)">Your Journey</span></h2>
+      <p class="section-sub">Our research-driven design reflects the lived realities of South Africa's disadvantaged youth.</p>
+    </div>
+    <div class="empathy-grid">
+      <div class="empathy-card see"><div class="empathy-title">👁 See</div><ul class="empathy-list"><li>Peers without devices or data</li><li>Schools with no tech infrastructure</li><li>Tech professionals from privileged backgrounds</li><li>Social media as primary digital environment</li></ul></div>
+      <div class="empathy-card feel"><div class="empathy-title">💜 Think & Feel</div><ul class="empathy-list"><li>Frustrated by limited opportunities</li><li>Anxious about a tech-driven future</li><li>Hopeful that technology can change their lives</li><li>Overlooked by mainstream platforms</li></ul></div>
+      <div class="empathy-card say"><div class="empathy-title">💬 Say & Do</div><ul class="empathy-list"><li>"I want to code but don't know where to start"</li><li>Active on social media, not educational platforms</li><li>Share info informally via WhatsApp</li><li>Ambitious but feel unsupported</li></ul></div>
+      <div class="empathy-card pain"><div class="empathy-title">😖 Pains</div><ul class="empathy-list"><li>No money for data or devices</li><li>Inaccessible and irrelevant content</li><li>No mentors or role models in STEM</li><li>Fear of failure and judgment</li></ul></div>
+    </div>
+    <div class="empathy-grid" style="margin-top:1rem">
+      <div class="empathy-card gain" style="grid-column:1/-1"><div class="empathy-title">🌟 Gains</div><ul class="empathy-list" style="display:grid;grid-template-columns:1fr 1fr;gap:0 2rem"><li>Skills leading to employment</li><li>Confidence and academic success</li><li>Community belonging and recognition</li><li>Access to mentors and innovation networks</li><li>Ability to uplift families</li><li>A clear pathway into the digital economy</li></ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- COURSES PAGE -->
+<div class="page" id="page-courses">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">Level 1 — REST API · CRUD</div>
+      <h2 class="section-title">Our <span style="color:var(--teal)">Courses</span></h2>
+      <p class="section-sub">Curriculum-aligned STEM tutorials for South African learners. Affordable, always.</p>
+    </div>
+    <div class="filter-bar">
+      <input class="search-box" type="text" placeholder="🔍  Search courses..." id="course-search" oninput="filterCourses()"/>
+      <button class="filter-btn active" onclick="setCategoryFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setCategoryFilter('Programming',this)">Programming</button>
+      <button class="filter-btn" onclick="setCategoryFilter('Web Dev',this)">Web Dev</button>
+      <button class="filter-btn" onclick="setCategoryFilter('RPAS Tutorials',this)">RPAS Tutorials</button>
+      <button class="filter-btn" onclick="setCategoryFilter('Data Science',this)">Data Science</button>
+      <button class="filter-btn" onclick="setCategoryFilter('Mobile',this)">Mobile</button>
+      <button class="filter-btn" onclick="setCategoryFilter('AI/ML',this)">AI/ML</button>
+    </div>
+    <div class="grid-3" id="courses-grid">
+      <div class="loading-state"><div class="spinner"></div><p>Fetching courses from API...</p></div>
+    </div>
+    <!-- Admin: Add Course -->
+    <div id="admin-add-course" style="display:none;margin-top:3rem">
+      <div class="section-header"><div class="section-tag">Admin Panel</div><h3 class="section-title" style="font-size:1.5rem">Add New Course</h3></div>
+      <div class="form-container" style="max-width:700px">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Course Title *</label><input class="form-input" id="new-title" placeholder="e.g. Intro to Python"/></div>
+          <div class="form-group"><label class="form-label">Category *</label>
+            <select class="form-input" id="new-category"><option>Programming</option><option>Web Dev</option><option>RPAS Tutorials</option><option>Data Science</option><option>Mobile</option><option>AI/ML</option><option>Security</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Level *</label>
+            <select class="form-input" id="new-level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Duration</label><input class="form-input" id="new-duration" placeholder="e.g. 8 weeks"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="new-desc" placeholder="Brief course description"/></div>
+        <button class="btn-primary" onclick="addCourse()" style="width:100%;padding:12px;font-size:14px;">+ Add Course</button>
+        <div id="add-course-msg" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMUNITY PAGE (WebSockets) -->
+<div class="page" id="page-community">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">Level 3 — WebSockets · Real-Time</div>
+      <h2 class="section-title">Community <span style="color:var(--teal)">Chat Rooms</span></h2>
+      <p class="section-sub">Connect with fellow learners in real time. Powered by Socket.io bidirectional WebSockets.</p>
+    </div>
+    <div id="chat-login-prompt" style="max-width:480px;margin:0 auto">
+      <div class="form-container">
+        <div class="form-title">Join the Community</div>
+        <div class="form-sub">Enter your name to join the chat. No account needed!</div>
+        <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="chat-name-input" placeholder="Thabo Learner" onkeydown="if(event.key==='Enter')joinChat()"/></div>
+        <button class="btn-primary" onclick="joinChat()" style="width:100%;padding:12px">Join Community Chat →</button>
+      </div>
+    </div>
+    <div id="chat-area" style="display:none">
+      <div id="chat-container">
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-title">Rooms</div>
+          <div class="chat-room active" onclick="switchRoom('general',this)"><span class="chat-room-dot"></span>General</div>
+          <div class="chat-room" onclick="switchRoom('python',this)"><span class="chat-room-dot" style="background:var(--teal)"></span>Python Help</div>
+          <div class="chat-room" onclick="switchRoom('webdev',this)"><span class="chat-room-dot" style="background:var(--warning)"></span>Web Dev</div>
+          <div class="chat-room" onclick="switchRoom('innovation',this)"><span class="chat-room-dot" style="background:#a78bfa"></span>Innovation Hub</div>
+          <div class="online-count" id="online-count">🟢 Connecting...</div>
+        </div>
+        <div class="chat-main">
+          <div class="chat-header">
+            <div><div class="chat-header-title" id="chat-room-title"># general</div><div class="chat-header-sub">Royal Mercy Institute Community</div></div>
+            <div class="chat-status"><span class="chat-status-dot"></span><span id="chat-status-text">Connected</span></div>
+          </div>
+          <div id="chat-messages"></div>
+          <div class="chat-input-area">
+            <input id="chat-input" type="text" placeholder="Share knowledge with your community..." onkeydown="if(event.key==='Enter')sendMessage()"/>
+            <button class="send-btn" onclick="sendMessage()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div class="page" id="page-about">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">About Royal Mercy Institute</div>
+      <h2 class="section-title">Our <span style="color:var(--teal)">Story</span></h2>
+    </div>
+    <div class="grid-2" style="margin-bottom:3rem">
+      <div class="card">
+        <div class="card-badge">Founded 2020</div>
+        <div class="card-title">Who We Are</div>
+        <div class="card-desc">Royal Mercy Institute is a South African science and technology enterprise founded in 2020 by Mohau Mokoena (CEO & CTO). Our mission is to make quality STEM education accessible to young people aged 10–25 from disadvantaged and under-resourced communities across South Africa.<br/><br/>We are currently in the empathy phase, with our app (FlutterFlow) and website (Wix) actively in development. We compete in the MTN Digital Solutions Competition hosted by Enactus South Africa under SDG 4: Quality Education.</div>
+      </div>
+      <div class="card">
+        <div class="card-badge">The Problem</div>
+        <div class="card-title">Why We Exist</div>
+        <div class="card-desc">South Africa faces a critical shortage of STEM skills. Young people from disadvantaged backgrounds face barriers including lack of data, devices, and locally relevant content. Existing global platforms like YouTube, Udemy and Khan Academy are too expensive, require reliable internet, or are not designed for the SA curriculum.<br/><br/>Without intervention, these learners risk exclusion from the digital economy entirely — perpetuating cycles of poverty and inequality.</div>
+      </div>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Our Mission</div><div class="feature-desc">To make quality, locally-relevant STEM education accessible to every South African learner, regardless of socioeconomic background.</div></div>
+      <div class="feature-card"><div class="feature-icon">👁</div><div class="feature-title">Our Vision</div><div class="feature-desc">To become the leading STEM education and innovation platform for disadvantaged communities in South Africa — and across Africa.</div></div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Competitive Edge</div><div class="feature-desc">Built specifically for SA disadvantaged communities. Locally contextualised content. Low-bandwidth mobile optimised. Mission-driven, not profit-driven.</div></div>
+      <div class="feature-card"><div class="feature-icon">🏆</div><div class="feature-title">Competition</div><div class="feature-desc">Competing in the MTN Digital Solutions Competition hosted by Enactus South Africa. SDG 4: Quality Education sector. Empathy phase currently active.</div></div>
+    </div>
+
+    <!-- Team -->
+    <div style="margin-top:4rem">
+      <div class="section-header"><div class="section-tag">Leadership</div><h3 class="section-title" style="font-size:1.8rem">Meet the <span style="color:var(--teal)">Founder</span></h3></div>
+      <div style="max-width:360px;margin:0 auto">
+        <div class="card" style="text-align:center">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--teal-d),var(--teal));margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:1.8rem;font-weight:800;color:var(--charcoal)">MM</div>
+          <div class="card-title" style="font-size:1.2rem">Mohau Mokoena</div>
+          <div style="color:var(--teal);font-size:13px;margin-bottom:1rem">CEO & CTO — Royal Mercy Institute</div>
+          <div class="card-desc">Founder of Royal Mercy Institute, passionate about empowering disadvantaged South African communities through accessible STEM education and innovation.</div>
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(64,196,200,0.1);font-size:12px;color:var(--silver)">Est. 2020 · Johannesburg, South Africa</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API DEMO PAGE (Level 1 + 2 + 3) -->
+<div class="page" id="page-api-demo">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">Full-Stack Task Demo</div>
+      <h2 class="section-title">API <span style="color:var(--teal)">Explorer</span></h2>
+      <p class="section-sub">Live demonstration of all three Codveda task levels implemented for Royal Mercy Institute.</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('level1','api-tabs')">Level 1 — REST API</button>
+      <button class="tab" onclick="switchTab('level2','api-tabs')">Level 2 — Auth + DB</button>
+      <button class="tab" onclick="switchTab('level3','api-tabs')">Level 3 — GraphQL + WS</button>
+    </div>
+
+    <!-- LEVEL 1 TAB -->
+    <div class="tab-content active" id="tab-level1">
+      <div class="section-header" style="text-align:left;margin-bottom:1.5rem">
+        <div class="section-tag">Level 1 Basic</div>
+        <h3 class="section-title" style="font-size:1.5rem">CRUD REST API — Courses Resource</h3>
+        <p class="section-sub" style="margin:0">Node.js + Express server with full Create, Read, Update, Delete operations.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div>
+          <div style="margin-bottom:1rem">
+            <div class="api-tester">
+              <div class="api-tester-header"><span class="method-badge method-get">GET</span><span class="api-url">/api/courses</span></div>
+              <div class="api-response" id="resp-get-courses">// Click to fetch all courses</div>
+            </div>
+            <button class="btn-primary" onclick="testApi('get-courses')" style="margin-top:8px;padding:8px 20px;font-size:13px">▶ Execute GET /api/courses</button>
+          </div>
+          <div style="margin-bottom:1rem">
+            <div class="api-tester">
+              <div class="api-tester-header"><span class="method-badge method-get">GET</span><span class="api-url">/api/stats</span></div>
+              <div class="api-response" id="resp-get-stats">// Click to fetch platform stats</div>
+            </div>
+            <button class="btn-primary" onclick="testApi('get-stats')" style="margin-top:8px;padding:8px 20px;font-size:13px">▶ Execute GET /api/stats</button>
+          </div>
+        </div>
+        <div>
+          <div style="margin-bottom:1rem">
+            <div class="api-tester">
+              <div class="api-tester-header"><span class="method-badge method-post">POST</span><span class="api-url">/api/auth/login</span></div>
+              <div class="api-response" id="resp-post-login">// Requires: { email, password }</div>
+            </div>
+            <button class="btn-primary" onclick="testApi('post-login')" style="margin-top:8px;padding:8px 20px;font-size:13px">▶ Test Login (admin)</button>
+          </div>
+          <div>
+            <div class="api-tester">
+              <div class="api-tester-header"><span class="method-badge method-get">GET</span><span class="api-url">/api/auth/me</span><span style="font-size:11px;color:var(--teal);margin-left:8px">🔒 JWT Protected</span></div>
+              <div class="api-response" id="resp-get-me">// Requires Bearer token in Authorization header</div>
+            </div>
+            <button class="btn-primary" onclick="testApi('get-me')" style="margin-top:8px;padding:8px 20px;font-size:13px">▶ Get My Profile (JWT)</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:2rem;padding:1.5rem;background:var(--charcoal-m);border-radius:var(--radius-lg);border:1px solid rgba(64,196,200,0.1)">
+        <h4 style="font-family:var(--font-head);font-size:1rem;color:var(--white);margin-bottom:1rem">📋 All API Endpoints</h4>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr></thead>
+            <tbody>
+              <tr><td><span class="method-badge method-get">GET</span></td><td><code>/api/courses</code></td><td>List all courses (filterable)</td><td>—</td></tr>
+              <tr><td><span class="method-badge method-get">GET</span></td><td><code>/api/courses/:id</code></td><td>Get single course</td><td>—</td></tr>
+              <tr><td><span class="method-badge method-post">POST</span></td><td><code>/api/courses</code></td><td>Create new course</td><td>Admin JWT</td></tr>
+              <tr><td><span class="method-badge method-put">PUT</span></td><td><code>/api/courses/:id</code></td><td>Update course</td><td>Admin JWT</td></tr>
+              <tr><td><span class="method-badge method-delete">DELETE</span></td><td><code>/api/courses/:id</code></td><td>Delete course</td><td>Admin JWT</td></tr>
+              <tr><td><span class="method-badge method-post">POST</span></td><td><code>/api/auth/signup</code></td><td>Register new user</td><td>—</td></tr>
+              <tr><td><span class="method-badge method-post">POST</span></td><td><code>/api/auth/login</code></td><td>Login + get JWT</td><td>—</td></tr>
+              <tr><td><span class="method-badge method-get">GET</span></td><td><code>/api/auth/me</code></td><td>Get current user</td><td>JWT</td></tr>
+              <tr><td><span class="method-badge method-get">GET</span></td><td><code>/api/users</code></td><td>List all users</td><td>Admin JWT</td></tr>
+              <tr><td><span class="method-badge method-get">GET</span></td><td><code>/api/stats</code></td><td>Platform statistics</td><td>—</td></tr>
+              <tr><td><span class="method-badge method-post">POST</span></td><td><code>/api/graphql</code></td><td>GraphQL endpoint</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVEL 2 TAB -->
+    <div class="tab-content" id="tab-level2">
+      <div class="section-header" style="text-align:left;margin-bottom:1.5rem">
+        <div class="section-tag">Level 2 Intermediate</div>
+        <h3 class="section-title" style="font-size:1.5rem">JWT Auth + Role-Based Access + Database</h3>
+      </div>
+      <div class="grid-2">
+        <div>
+          <h4 style="font-family:var(--font-head);font-size:1rem;color:var(--white);margin-bottom:1rem">🔐 Authentication Flow</h4>
+          <div class="card" style="font-size:13px;line-height:1.8">
+            <div style="color:var(--teal);font-weight:600;margin-bottom:0.5rem">How JWT Auth Works:</div>
+            <ol style="padding-left:1.2rem;color:var(--silver)">
+              <li>User submits email + password to <code style="color:var(--teal-g)">/api/auth/login</code></li>
+              <li>Server verifies password with <strong style="color:var(--off-white)">bcrypt.compare()</strong></li>
+              <li>Server signs a JWT with user ID, email, role</li>
+              <li>Token stored client-side (localStorage)</li>
+              <li>Subsequent requests include <code style="color:var(--teal-g)">Authorization: Bearer &lt;token&gt;</code></li>
+              <li>Middleware verifies token on protected routes</li>
+              <li>Role check: admin vs learner access</li>
+            </ol>
+          </div>
+          <div style="margin-top:1rem">
+            <div class="api-tester">
+              <div class="api-tester-header"><span class="method-badge method-get">GET</span><span class="api-url">/api/users</span><span style="font-size:11px;color:var(--danger);margin-left:8px">🔒 Admin Only</span></div>
+              <div class="api-response" id="resp-users">// Fetches all users — admin JWT required</div>
+            </div>
+            <button class="btn-primary" onclick="testApi('get-users')" style="margin-top:8px;padding:8px 20px;font-size:13px">▶ Get Users (Admin JWT)</button>
+          </div>
+        </div>
+        <div>
+          <h4 style="font-family:var(--font-head);font-size:1rem;color:var(--white);margin-bottom:1rem">🗄️ Database Schema (In-Memory)</h4>
+          <div class="card">
+            <div style="font-family:monospace;font-size:12px;color:var(--teal-g);line-height:2">
+              <div style="color:var(--silver-d)">// User Model</div>
+              <div>{ id, name, email, password<span style="color:var(--silver-d)">/*bcrypt*/</span>,</div>
+              <div>&nbsp;&nbsp;role<span style="color:var(--silver-d)"> /* admin|learner */</span>,</div>
+              <div>&nbsp;&nbsp;createdAt }</div>
+              <br/>
+              <div style="color:var(--silver-d)">// Course Model</div>
+              <div>{ id, title, category, level,</div>
+              <div>&nbsp;&nbsp;duration, instructor,</div>
+              <div>&nbsp;&nbsp;enrolled, description,</div>
+              <div>&nbsp;&nbsp;createdAt }</div>
+              <br/>
+              <div style="color:var(--silver-d)">// JWT Payload</div>
+              <div>{ id, email, role, name,</div>
+              <div>&nbsp;&nbsp;iat, exp }</div>
+            </div>
+          </div>
+          <div id="users-table-wrap" style="margin-top:1rem;display:none">
+            <div class="data-table-wrap"><table class="data-table" id="users-table"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVEL 3 TAB -->
+    <div class="tab-content" id="tab-level3">
+      <div class="section-header" style="text-align:left;margin-bottom:1.5rem">
+        <div class="section-tag">Level 3 Advanced</div>
+        <h3 class="section-title" style="font-size:1.5rem">GraphQL API + WebSocket Architecture</h3>
+      </div>
+      <div class="grid-2">
+        <div>
+          <h4 style="font-family:var(--font-head);font-size:1rem;color:var(--white);margin-bottom:1rem">📊 GraphQL Query</h4>
+          <div class="api-tester">
+            <div class="api-tester-header"><span class="method-badge method-post">POST</span><span class="api-url">/api/graphql</span></div>
+            <div class="api-response" id="resp-graphql">// GraphQL: POST with { query } body</div>
+          </div>
+          <button class="btn-primary" onclick="testApi('graphql')" style="margin-top:8px;padding:8px 20px;font-size:13px">▶ Run GraphQL Query</button>
+          <div style="margin-top:1.5rem" class="card">
+            <div style="font-family:monospace;font-size:12px;color:var(--teal-g);line-height:2">
+              <div style="color:var(--silver-d)">// GraphQL Schema (Apollo-style)</div>
+              <div>type Course {</div>
+              <div>&nbsp;&nbsp;id: ID!</div>
+              <div>&nbsp;&nbsp;title: String!</div>
+              <div>&nbsp;&nbsp;category: String</div>
+              <div>&nbsp;&nbsp;level: String</div>
+              <div>&nbsp;&nbsp;enrolled: Int</div>
+              <div>}</div>
+              <div>type Query {</div>
+              <div>&nbsp;&nbsp;courses: [Course]</div>
+              <div>&nbsp;&nbsp;stats: Stats</div>
+              <div>}</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h4 style="font-family:var(--font-head);font-size:1rem;color:var(--white);margin-bottom:1rem">⚡ WebSocket Architecture</h4>
+          <div class="card">
+            <div style="font-size:13px;color:var(--silver);line-height:1.8">
+              <div style="color:var(--teal);font-weight:600;margin-bottom:0.5rem">Socket.io Events:</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+                <div><div style="color:var(--success);font-size:11px;font-weight:700">CLIENT → SERVER</div><div><code style="color:var(--teal-g)">join</code> — enter room</div><div><code style="color:var(--teal-g)">message</code> — send msg</div><div><code style="color:var(--teal-g)">disconnect</code> — leave</div></div>
+                <div><div style="color:var(--warning);font-size:11px;font-weight:700">SERVER → CLIENT</div><div><code style="color:var(--teal-g)">message</code> — broadcast</div><div><code style="color:var(--teal-g)">userJoined</code> — notify</div><div><code style="color:var(--teal-g)">history</code> — past msgs</div></div>
+              </div>
+              <br/>
+              <div style="color:var(--teal);font-weight:600;margin-bottom:0.5rem">Full-Stack Stack:</div>
+              <div>• Frontend: React-style SPA (Vanilla JS)</div>
+              <div>• Backend: Node.js + Express</div>
+              <div>• Real-time: Socket.io</div>
+              <div>• Auth: JWT + bcrypt</div>
+              <div>• DB: MongoDB (simulated)</div>
+              <div>• GraphQL: Apollo-style endpoint</div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding:1rem;background:var(--teal-glow);border:1px solid rgba(64,196,200,0.2);border-radius:var(--radius)">
+            <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:0.5rem">✅ MERN Stack Applied:</div>
+            <div style="font-size:12px;color:var(--off-white);line-height:1.8"><strong style="color:var(--teal)">M</strong>ongoDB → In-memory data store<br/><strong style="color:var(--teal)">E</strong>xpress → REST + GraphQL API server<br/><strong style="color:var(--teal)">R</strong>eact → Component-based SPA frontend<br/><strong style="color:var(--teal)">N</strong>ode.js → Server runtime + WebSockets</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div class="page" id="page-dashboard">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">My Dashboard</div>
+      <h2 class="section-title">Welcome back, <span style="color:var(--teal)" id="dash-name">Learner</span></h2>
+    </div>
+    <div class="dashboard-grid">
+      <div class="dash-card"><div class="dash-num" id="dash-stat1">6</div><div class="dash-label">Available Courses</div></div>
+      <div class="dash-card"><div class="dash-num" id="dash-enrolled">0</div><div class="dash-label">My Enrollments</div></div>
+      <div class="dash-card"><div class="dash-num">0%</div><div class="dash-label">Completion Rate</div></div>
+      <div class="dash-card"><div class="dash-num" id="dash-role" style="font-size:1.2rem;padding-top:0.5rem">learner</div><div class="dash-label">Account Role</div></div>
+    </div>
+    <div id="admin-panel" style="display:none">
+      <div class="section-header" style="text-align:left;margin-bottom:1.5rem;margin-top:2rem">
+        <div class="section-tag">Admin Only</div>
+        <h3 class="section-title" style="font-size:1.5rem">User Management</h3>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table" id="admin-users-table">
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Action</th></tr></thead>
+          <tbody id="admin-users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="margin-top:3rem">
+      <h3 style="font-family:var(--font-head);font-size:1.3rem;color:var(--white);margin-bottom:1.5rem">My Enrolled Courses</h3>
+      <div id="enrolled-courses" class="grid-3"><div style="color:var(--silver);font-size:14px">Enroll in courses to see them here.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ MODALS ════════════ -->
+<!-- Login Modal -->
+<div class="modal-overlay hidden" id="login-modal" onclick="closeModalOutside(event,'login-modal')">
+  <div class="modal">
+    <div class="modal-title">Sign In</div>
+    <div class="modal-sub">Welcome back to Royal Mercy Institute</div>
+    <div id="login-alert"></div>
+    <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="login-email" type="email" placeholder="you@example.com"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="login-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div style="font-size:12px;color:var(--silver-d);margin-bottom:1rem">Demo: mohaumokoena@rmi.co.za / admin2020 &nbsp;|&nbsp; thabo@rmi.co.za / learner123</div>
+    <button class="btn-primary" onclick="doLogin()" style="width:100%;padding:12px;font-size:14px">Sign In</button>
+    <div style="text-align:center;margin-top:1rem;font-size:13px;color:var(--silver)">Don't have an account? <span style="color:var(--teal);cursor:pointer" onclick="closeModal('login-modal');openModal('signup-modal')">Sign up free</span></div>
+  </div>
+</div>
+
+<!-- Signup Modal -->
+<div class="modal-overlay hidden" id="signup-modal" onclick="closeModalOutside(event,'signup-modal')">
+  <div class="modal">
+    <div class="modal-title">Create Account</div>
+    <div class="modal-sub">Join Royal Mercy Institute — completely affordable</div>
+    <div id="signup-alert"></div>
+    <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="signup-name" placeholder="Thabo Dlamini"/></div>
+    <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="signup-email" type="email" placeholder="thabo@email.com"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="signup-password" type="password" placeholder="Min. 6 characters" onkeydown="if(event.key==='Enter')doSignup()"/></div>
+    <button class="btn-primary" onclick="doSignup()" style="width:100%;padding:12px;font-size:14px">Create Free Account</button>
+    <div style="text-align:center;margin-top:1rem;font-size:13px;color:var(--silver)">Already have an account? <span style="color:var(--teal);cursor:pointer" onclick="closeModal('signup-modal');openModal('login-modal')">Sign in</span></div>
+  </div>
+</div>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">Royal <span>Mercy</span> Institute</div>
+      <p class="footer-desc">Empowering disadvantaged South African communities through affordable, locally-relevant science and technology education. Built for the next generation of African innovators.</p>
+      <div class="footer-slogan">"You Perceive It Possible; You Make It Possible"</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Platform</div>
+      <span class="footer-link" onclick="navigate('courses')">Courses</span>
+      <span class="footer-link" onclick="navigate('community')">Community</span>
+      <span class="footer-link" onclick="navigate('api-demo')">API Demo</span>
+    </div>
+    <div>
+      <div class="footer-col-title">About</div>
+      <span class="footer-link" onclick="navigate('about')">Our Story</span>
+      <span class="footer-link">MTN Competition</span>
+      <span class="footer-link">SDG 4</span>
+    </div>
+    <div>
+      <div class="footer-col-title">Contact</div>
+      <span class="footer-link">info@rmi.co.za</span>
+      <span class="footer-link">@RoyalMercyInstitute</span>
+      <span class="footer-link">Johannesburg, SA</span>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">©2026 Royal Mercy Institute. Est. 2020 · South Africa</div>
+    <div class="footer-copy">MTN Digital Solutions Competition · Enactus SA · SDG 4: Quality Education</div>
+  </div>
+</footer>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- ════════════ JAVASCRIPT ════════════ -->
+<script>
+// ─── State ────────────────────────────────────────
+const API = '';
+let state = {
+  token: localStorage.getItem('rmi_token'),
+  user: JSON.parse(localStorage.getItem('rmi_user') || 'null'),
+  courses: [],
+  enrolledIds: JSON.parse(localStorage.getItem('rmi_enrolled') || '[]'),
+  currentPage: 'home',
+  categoryFilter: 'all',
+  socket: null,
+  chatName: null,
+  chatRoom: 'general',
+};
+
+// ─── Toast ────────────────────────────────────────
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  const icons = {success:'✓',error:'✕',info:'ℹ'};
+  t.innerHTML = `<span>${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>t.remove(), 4000);
+}
+
+// ─── Navigation ───────────────────────────────────
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  const target = document.getElementById(`page-${page}`);
+  if (target) { target.classList.add('active'); state.currentPage = page; }
+  const navBtn = [...document.querySelectorAll('.nav-link')].find(b=>b.textContent.toLowerCase().includes(page.replace('-',' ')));
+  if (navBtn) navBtn.classList.add('active');
+  window.scrollTo(0,0);
+  if (page==='courses') loadCourses();
+  if (page==='home') loadHomeStats();
+  if (page==='dashboard') loadDashboard();
+}
+
+// ─── Modal ────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function closeModalOutside(e,id) { if(e.target.id===id) closeModal(id); }
+
+// ─── API Fetch Helper ─────────────────────────────
+async function apiFetch(path, options={}) {
+  const headers = { 'Content-Type':'application/json', ...(options.headers||{}) };
+  if (state.token) headers['Authorization'] = `Bearer ${state.token}`;
+  const res = await fetch(API+path, { ...options, headers });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ─── Auth ─────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const alertEl = document.getElementById('login-alert');
+  alertEl.innerHTML = '';
+  if (!email||!password) { alertEl.innerHTML='<div class="alert alert-error">Please fill in all fields.</div>'; return; }
+  try {
+    const data = await apiFetch('/api/auth/login', { method:'POST', body:JSON.stringify({email,password}) });
+    state.token = data.token; state.user = data.user;
+    localStorage.setItem('rmi_token', data.token);
+    localStorage.setItem('rmi_user', JSON.stringify(data.user));
+    updateNavAuth();
+    closeModal('login-modal');
+    toast(`Welcome back, ${data.user.name}! 🎉`, 'success');
+    if (data.user.role==='admin') navigate('dashboard');
+  } catch(err) {
+    alertEl.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+  }
+}
+
+async function doSignup() {
+  const name = document.getElementById('signup-name').value;
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+  const alertEl = document.getElementById('signup-alert');
+  alertEl.innerHTML = '';
+  if (!name||!email||!password) { alertEl.innerHTML='<div class="alert alert-error">Please fill in all fields.</div>'; return; }
+  if (password.length<6) { alertEl.innerHTML='<div class="alert alert-error">Password must be at least 6 characters.</div>'; return; }
+  try {
+    const data = await apiFetch('/api/auth/signup', { method:'POST', body:JSON.stringify({name,email,password}) });
+    state.token = data.token; state.user = data.user;
+    localStorage.setItem('rmi_token', data.token);
+    localStorage.setItem('rmi_user', JSON.stringify(data.user));
+    updateNavAuth();
+    closeModal('signup-modal');
+    toast(`Account created! Welcome, ${data.user.name}! 🚀`, 'success');
+  } catch(err) {
+    alertEl.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+  }
+}
+
+function doLogout() {
+  state.token = null; state.user = null;
+  localStorage.removeItem('rmi_token'); localStorage.removeItem('rmi_user');
+  updateNavAuth();
+  navigate('home');
+  toast('Signed out successfully.', 'info');
+}
+
+function updateNavAuth() {
+  const navAuth = document.getElementById('nav-auth');
+  if (state.user) {
+    const initials = state.user.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    navAuth.innerHTML = `
+      <div class="user-menu">
+        <div style="text-align:right"><div class="user-name">${state.user.name}</div><div class="user-role">${state.user.role}</div></div>
+        <div class="user-avatar" onclick="navigate('dashboard')" title="My Dashboard">${initials}</div>
+        <button class="btn-danger" onclick="doLogout()">Sign Out</button>
+      </div>`;
+  } else {
+    navAuth.innerHTML = `<button class="btn-ghost" onclick="openModal('login-modal')">Sign In</button><button class="btn-primary" onclick="openModal('signup-modal')">Join Free</button>`;
+  }
+}
+
+// ─── Courses ──────────────────────────────────────
+async function loadCourses() {
+  const grid = document.getElementById('courses-grid');
+  grid.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Fetching from API...</p></div>';
+  try {
+    const data = await apiFetch('/api/courses');
+    state.courses = data.courses;
+    renderCourses(state.courses);
+    if (state.user?.role==='admin') document.getElementById('admin-add-course').style.display='block';
+  } catch(err) {
+    grid.innerHTML = `<div class="loading-state">Failed to load courses: ${err.message}</div>`;
+  }
+}
+
+function renderCourses(courses, targetId='courses-grid') {
+  const grid = document.getElementById(targetId);
+  if (!courses.length) { grid.innerHTML='<div class="loading-state">No courses found.</div>'; return; }
+  grid.innerHTML = courses.map(c => `
+    <div class="card" style="display:flex;flex-direction:column">
+      <div class="card-badge ${c.level.toLowerCase()}">${c.level}</div>
+      <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">${c.category}</div>
+      <div class="card-title">${c.title}</div>
+      <div class="card-desc">${c.description}</div>
+      <div class="card-meta">
+        <span>⏱ ${c.duration}</span>
+        <span>👥 ${c.enrolled} enrolled</span>
+      </div>
+      <div class="progress-bar" style="margin:12px 0"><div class="progress-fill" style="width:${Math.min(100,c.enrolled/2)}%"></div></div>
+      <button class="enrol-btn ${state.enrolledIds.includes(c.id)?'enrolled':''}" onclick="toggleEnroll('${c.id}',this)">
+        ${state.enrolledIds.includes(c.id)?'✓ Enrolled':'Enrol Now — Free'}
+      </button>
+      ${state.user?.role==='admin'?`<button class="btn-danger" onclick="deleteCourse('${c.id}')" style="margin-top:6px;width:100%;padding:8px">Delete Course</button>`:''}
+    </div>`).join('');
+}
+
+function toggleEnroll(id, btn) {
+  if (!state.user) { openModal('login-modal'); toast('Please sign in to enrol in courses.','info'); return; }
+  if (state.enrolledIds.includes(id)) {
+    state.enrolledIds = state.enrolledIds.filter(e=>e!==id);
+    btn.textContent = 'Enrol Now — Free';
+    btn.classList.remove('enrolled');
+    toast('Unenrolled from course.','info');
+  } else {
+    state.enrolledIds.push(id);
+    btn.textContent = '✓ Enrolled';
+    btn.classList.add('enrolled');
+    toast('Successfully enrolled! 🎓','success');
+  }
+  localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
+  document.getElementById('dash-enrolled').textContent = state.enrolledIds.length;
+}
+
+function filterCourses() {
+  const q = document.getElementById('course-search').value.toLowerCase();
+  let filtered = state.courses;
+  if (state.categoryFilter !== 'all') filtered = filtered.filter(c=>c.category===state.categoryFilter);
+  if (q) filtered = filtered.filter(c=>c.title.toLowerCase().includes(q)||c.description.toLowerCase().includes(q));
+  renderCourses(filtered);
+}
+
+function setCategoryFilter(cat, btn) {
+  state.categoryFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterCourses();
+}
+
+async function addCourse() {
+  const title = document.getElementById('new-title').value;
+  const category = document.getElementById('new-category').value;
+  const level = document.getElementById('new-level').value;
+  const duration = document.getElementById('new-duration').value;
+  const description = document.getElementById('new-desc').value;
+  const msg = document.getElementById('add-course-msg');
+  try {
+    await apiFetch('/api/courses', { method:'POST', body:JSON.stringify({title,category,level,duration,description}) });
+    toast('Course added successfully!','success');
+    msg.innerHTML='<div class="alert alert-success">Course created!</div>';
+    await loadCourses();
+  } catch(err) { msg.innerHTML=`<div class="alert alert-error">${err.message}</div>`; }
+}
+
+async function deleteCourse(id) {
+  if (!confirm('Delete this course?')) return;
+  try {
+    await apiFetch(`/api/courses/${id}`, { method:'DELETE' });
+    toast('Course deleted.','info');
+    await loadCourses();
+  } catch(err) { toast(err.message,'error'); }
+}
+
+// ─── Home Stats ───────────────────────────────────
+async function loadHomeStats() {
+  try {
+    const data = await apiFetch('/api/stats');
+    document.getElementById('stat-courses').textContent = data.totalCourses;
+    document.getElementById('stat-learners').textContent = data.totalEnrolled + '+';
+    const homeGrid = document.getElementById('home-courses-grid');
+    const courses = await apiFetch('/api/courses');
+    state.courses = courses.courses;
+    homeGrid.innerHTML = courses.courses.slice(0,3).map(c=>`
+      <div class="card">
+        <div class="card-badge ${c.level.toLowerCase()}">${c.level}</div>
+        <div class="card-title">${c.title}</div>
+        <div class="card-desc">${c.description}</div>
+        <div class="card-meta"><span>⏱ ${c.duration}</span><span>👥 ${c.enrolled}</span></div>
+      </div>`).join('');
+  } catch {}
+}
+
+// ─── Dashboard ────────────────────────────────────
+async function loadDashboard() {
+  if (!state.user) { navigate('home'); return; }
+  document.getElementById('dash-name').textContent = state.user.name.split(' ')[0];
+  document.getElementById('dash-role').textContent = state.user.role;
+  document.getElementById('dash-enrolled').textContent = state.enrolledIds.length;
+  try {
+    const data = await apiFetch('/api/stats');
+    document.getElementById('dash-stat1').textContent = data.totalCourses;
+  } catch {}
+  if (state.user.role==='admin') {
+    document.getElementById('admin-panel').style.display='block';
+    try {
+      const users = await apiFetch('/api/users');
+      document.getElementById('admin-users-tbody').innerHTML = users.map(u=>`
+        <tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td>
+        <td><span class="card-badge">${u.role}</span></td>
+        <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+        <td><button class="btn-danger" onclick="deleteUser('${u.id}')">Delete</button></td></tr>`).join('');
+    } catch {}
+  }
+  const enrolledGrid = document.getElementById('enrolled-courses');
+  const enrolled = state.courses.filter(c=>state.enrolledIds.includes(c.id));
+  if (enrolled.length) renderCourses(enrolled,'enrolled-courses');
+  else enrolledGrid.innerHTML='<div style="color:var(--silver);font-size:14px">No enrollments yet. <span style="color:var(--teal);cursor:pointer" onclick="navigate(\'courses\')">Browse courses →</span></div>';
+}
+
+async function deleteUser(id) {
+  if (!confirm('Delete this user?')) return;
+  try {
+    await apiFetch(`/api/users/${id}`, {method:'DELETE'});
+    toast('User deleted.','info');
+    loadDashboard();
+  } catch(err) { toast(err.message,'error'); }
+}
+
+// ─── Tabs ─────────────────────────────────────────
+function switchTab(tabId, groupId) {
+  const group = document.getElementById(`page-${state.currentPage}`) || document;
+  group.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  group.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── API Demo ─────────────────────────────────────
+let demoToken = null;
+async function testApi(type) {
+  try {
+    switch(type) {
+      case 'get-courses': {
+        const d = await apiFetch('/api/courses');
+        document.getElementById('resp-get-courses').textContent = JSON.stringify(d, null, 2);
+        break;
+      }
+      case 'get-stats': {
+        const d = await apiFetch('/api/stats');
+        document.getElementById('resp-get-stats').textContent = JSON.stringify(d, null, 2);
+        break;
+      }
+      case 'post-login': {
+        const d = await apiFetch('/api/auth/login', { method:'POST', body:JSON.stringify({email:'mohaumokoena@rmi.co.za',password:'admin2020'}) });
+        demoToken = d.token;
+        document.getElementById('resp-post-login').textContent = JSON.stringify({...d, token: d.token.slice(0,40)+'...'}, null, 2);
+        toast('JWT token obtained!','success');
+        break;
+      }
+      case 'get-me': {
+        if (!demoToken && !state.token) { toast('Run Login first to get a token','info'); return; }
+        const tok = state.token || demoToken;
+        const res = await fetch(API+'/api/auth/me', {headers:{'Authorization':`Bearer ${tok}`}});
+        const d = await res.json();
+        document.getElementById('resp-get-me').textContent = JSON.stringify(d, null, 2);
+        break;
+      }
+      case 'get-users': {
+        const tok = state.token || demoToken;
+        if (!tok) { toast('Run Login first','info'); return; }
+        const res = await fetch(API+'/api/users', {headers:{'Authorization':`Bearer ${tok}`,'Content-Type':'application/json'}});
+        const d = await res.json();
+        document.getElementById('resp-users').textContent = JSON.stringify(d, null, 2);
+        if (Array.isArray(d)) {
+          document.getElementById('users-table-wrap').style.display='block';
+          document.getElementById('users-tbody').innerHTML = d.map(u=>`<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td><span class="card-badge">${u.role}</span></td></tr>`).join('');
+        }
+        break;
+      }
+      case 'graphql': {
+        const res = await fetch(API+'/api/graphql', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'{ courses { id title category level enrolled } }'})});
+        const d = await res.json();
+        document.getElementById('resp-graphql').textContent = JSON.stringify(d, null, 2);
+        break;
+      }
+    }
+  } catch(err) {
+    toast(err.message,'error');
+  }
+}
+
+// ─── WebSocket Chat ───────────────────────────────
+function joinChat() {
+  const name = document.getElementById('chat-name-input').value.trim();
+  if (!name) { toast('Please enter your name','error'); return; }
+  if (name.length < 2) { toast('Name must be at least 2 characters','error'); return; }
+  state.chatName = name;
+  document.getElementById('chat-login-prompt').style.display = 'none';
+  document.getElementById('chat-area').style.display = 'block';
+  initSocket();
+}
+
+function initSocket() {
+  if (state.socket?.connected) return;
+  state.socket = io(window.location.origin);
+
+  state.socket.on('connect', () => {
+    document.getElementById('chat-status-text').textContent = 'Connected';
+    state.socket.emit('join', { name: state.chatName, room: state.chatRoom });
+  });
+
+  state.socket.on('disconnect', () => {
+    document.getElementById('chat-status-text').textContent = 'Reconnecting...';
+  });
+
+  state.socket.on('message', (msg) => appendMessage(msg));
+  state.socket.on('history', (msgs) => {
+    document.getElementById('chat-messages').innerHTML = '';
+    msgs.forEach(m => appendMessage(m));
+  });
+  state.socket.on('userJoined', ({ name, count }) => {
+    appendSystem(`${name} joined the room`);
+    document.getElementById('online-count').innerHTML = `🟢 ${count} online`;
+  });
+  state.socket.on('userLeft', ({ name, count }) => {
+    appendSystem(`${name} left the room`);
+    document.getElementById('online-count').innerHTML = `🟢 ${count} online`;
+  });
+}
+
+function appendMessage(msg) {
+  const container = document.getElementById('chat-messages');
+  const isOwn = msg.name === state.chatName;
+  const initials = msg.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  const div = document.createElement('div');
+  div.className = `chat-msg${isOwn?' own':''}`;
+  div.innerHTML = `
+    <div class="chat-avatar">${initials}</div>
+    <div class="chat-bubble">
+      ${!isOwn?`<div class="chat-bubble-name">${msg.name}</div>`:''}
+      <div>${msg.text}</div>
+      <div class="chat-bubble-time">${msg.time}</div>
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendSystem(text) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-system';
+  div.textContent = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || !state.socket) return;
+  state.socket.emit('message', { text, room: state.chatRoom });
+  input.value = '';
+}
+
+function switchRoom(room, el) {
+  state.chatRoom = room;
+  document.querySelectorAll('.chat-room').forEach(r=>r.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('chat-room-title').textContent = `# ${room}`;
+  document.getElementById('chat-messages').innerHTML = '';
+  if (state.socket?.connected) state.socket.emit('join', { name: state.chatName, room });
+}
+
+// ─── Init ─────────────────────────────────────────
+updateNavAuth();
+loadHomeStats();
+if (state.user) document.getElementById('dash-name').textContent = state.user.name.split(' ')[0];
+</script>
+</body>
+</html>
