@@ -474,6 +474,11 @@ footer {
 .footer-bottom { max-width:1200px;margin:2rem auto 0;padding-top:1.5rem;border-top:1px solid rgba(64,196,200,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem; }
 .footer-copy { font-size:12px;color:var(--silver-d); }
 
+/* ─── MAP ICON ───────────────────────────────── */
+.rmi-map-icon { background: none !important; border: none !important; }
+.leaflet-popup-content-wrapper { border-radius: 10px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.18) !important; }
+.leaflet-popup-tip { display: none !important; }
+
 /* ─── LOADING SPINNER ────────────────────────── */
 .spinner { width:32px;height:32px;border:3px solid rgba(64,196,200,0.2);border-top-color:var(--teal);border-radius:50%;animation:spin 0.7s linear infinite;margin:2rem auto; }
 .loading-state { text-align:center;padding:3rem;color:var(--silver); }
@@ -2062,8 +2067,11 @@ if (state.user) document.getElementById('dash-name').textContent = state.user.na
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLEo=" crossorigin=""></script>
 <script>
 (function initLeafletMap() {
-  // Vanderbijlpark coordinates
   var lat = -26.7322, lng = 27.8395;
+
+  // Wait for the map container to exist in the DOM
+  var container = document.getElementById('rmi-leaflet-map');
+  if (!container) return;
 
   var map = L.map('rmi-leaflet-map', {
     center: [lat, lng],
@@ -2072,51 +2080,76 @@ if (state.user) document.getElementById('dash-name').textContent = state.user.na
     scrollWheelZoom: false
   });
 
-  // OpenStreetMap tile layer — free, no API key needed
+  // OpenStreetMap tiles — free, no API key needed
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19
   }).addTo(map);
 
-  // Custom RMI marker icon
+  // SVG pin icon — no emoji, works on all browsers & mobile
+  var pinSvg = [
+    '<svg xmlns="http://www.w3.org/2000/svg" width="42" height="54" viewBox="0 0 42 54">',
+      '<defs>',
+        '<linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">',
+          '<stop offset="0%" style="stop-color:#0d9488"/>',
+          '<stop offset="100%" style="stop-color:#40c4c8"/>',
+        '</linearGradient>',
+      '</defs>',
+      // Drop shadow
+      '<ellipse cx="21" cy="52" rx="8" ry="3" fill="rgba(0,0,0,0.25)"/>',
+      // Pin body
+      '<path d="M21 2C12.16 2 5 9.16 5 18c0 12.5 16 32 16 32s16-19.5 16-32C37 9.16 29.84 2 21 2z" fill="url(#pinGrad)" stroke="white" stroke-width="2"/>',
+      // White inner circle
+      '<circle cx="21" cy="18" r="7" fill="white" opacity="0.95"/>',
+      // Teal dot in centre
+      '<circle cx="21" cy="18" r="4" fill="#0d9488"/>',
+    '</svg>'
+  ].join('');
+
   var rmiIcon = L.divIcon({
-    html: '<div style="background:linear-gradient(135deg,#0d9488,#40c4c8);width:44px;height:44px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 16px rgba(0,0,0,0.4)"><div style="transform:rotate(45deg);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;margin-top:2px">🏫</div></div>',
-    className: '',
-    iconSize: [44, 44],
-    iconAnchor: [22, 44],
-    popupAnchor: [0, -48]
+    html: '<div style="filter:drop-shadow(0 4px 8px rgba(0,0,0,0.35))">' + pinSvg + '</div>',
+    className: 'rmi-map-icon',
+    iconSize:   [42, 54],
+    iconAnchor: [21, 54],
+    popupAnchor:[0, -58]
   });
 
-  // Add marker with popup
+  // Marker + popup
   L.marker([lat, lng], { icon: rmiIcon })
     .addTo(map)
     .bindPopup(
-      '<div style="font-family:sans-serif;min-width:200px">' +
-        '<div style="font-weight:700;font-size:14px;color:#0d9488;margin-bottom:6px">🏫 Royal Mercy Institute</div>' +
-        '<div style="font-size:12px;color:#333;line-height:1.6">' +
-          '<b>📍</b> Vanderbijlpark, Gauteng<br/>' +
-          '<b>📞</b> 061 917 7807<br/>' +
-          '<b>✉</b> royalmercyinstitute@gmail.com<br/>' +
-          '<b>🕐</b> Mon–Fri 08:00–17:00' +
+      '<div style="font-family:Arial,sans-serif;min-width:210px;padding:4px 2px">' +
+        '<div style="font-weight:800;font-size:14px;color:#0d9488;margin-bottom:8px;border-bottom:1px solid #e5e7eb;padding-bottom:6px">' +
+          'Royal Mercy Institute' +
+        '</div>' +
+        '<div style="font-size:12px;color:#374151;line-height:2">' +
+          '<span style="color:#0d9488;font-weight:600">Address:</span> Vanderbijlpark, Gauteng<br/>' +
+          '<span style="color:#0d9488;font-weight:600">Phone:</span> 061 917 7807<br/>' +
+          '<span style="color:#0d9488;font-weight:600">Email:</span> royalmercyinstitute@gmail.com<br/>' +
+          '<span style="color:#0d9488;font-weight:600">Hours:</span> Mon-Fri 08:00-17:00' +
         '</div>' +
         '<a href="https://www.google.com/maps/dir/?api=1&destination=-26.7322,27.8395" target="_blank" ' +
-           'style="display:inline-block;margin-top:10px;padding:6px 14px;background:#0d9488;color:white;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">' +
-           '📍 Get Directions' +
+           'style="display:block;margin-top:10px;padding:8px 0;background:#0d9488;color:white;border-radius:6px;' +
+                  'text-decoration:none;font-size:12px;font-weight:700;text-align:center">' +
+          'Get Directions in Google Maps' +
         '</a>' +
       '</div>',
-      { maxWidth: 260 }
+      { maxWidth: 270 }
     )
     .openPopup();
 
-  // Draw a subtle circle around the area
+  // Teal radius circle
   L.circle([lat, lng], {
-    radius: 500,
+    radius: 600,
     color: '#40c4c8',
     fillColor: '#40c4c8',
-    fillOpacity: 0.08,
+    fillOpacity: 0.07,
     weight: 1.5,
-    dashArray: '6 4'
+    dashArray: '5 5'
   }).addTo(map);
+
+  // Fix map rendering if container was hidden on load
+  setTimeout(function() { map.invalidateSize(); }, 300);
 
 })();
 </script>
