@@ -1166,6 +1166,150 @@ footer {
   .pdf-embed-wrap iframe { height:340px; }
 }
 
+
+/* ─── ROLE BADGE / USER ID ───────────────────── */
+.role-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.6px;
+}
+.role-badge.admin    { background:rgba(239,68,68,0.15);  color:#f87171; border:1px solid rgba(239,68,68,0.3); }
+.role-badge.tutor    { background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); }
+.role-badge.educator { background:rgba(251,146,60,0.15); color:#fb923c; border:1px solid rgba(251,146,60,0.3); }
+.role-badge.mentor   { background:rgba(34,197,94,0.15);  color:#4ade80; border:1px solid rgba(34,197,94,0.3); }
+.role-badge.learner  { background:rgba(64,196,200,0.15); color:var(--teal); border:1px solid rgba(64,196,200,0.3); }
+
+.user-id-badge {
+  font-family:var(--font-mono); font-size:10px; color:var(--silver-d);
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+  padding:3px 8px; border-radius:4px; letter-spacing:0.5px;
+}
+
+/* ─── PAYMENT MODAL ──────────────────────────── */
+.payment-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.82);
+  z-index:3000; align-items:center; justify-content:center; padding:1rem;
+}
+.payment-overlay.open { display:flex; }
+.payment-modal {
+  background:#0f1117; border:1px solid rgba(64,196,200,0.25);
+  border-radius:20px; width:100%; max-width:520px;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6); animation:scaleIn 0.25s ease;
+  overflow:hidden;
+}
+.payment-header {
+  background:linear-gradient(135deg,#0d9488,#40c4c8);
+  padding:1.5rem 1.75rem; display:flex; justify-content:space-between; align-items:center;
+}
+.payment-header-title { font-size:1.1rem; font-weight:800; color:#0f1117; }
+.payment-header-sub   { font-size:12px; color:rgba(15,17,23,0.7); margin-top:2px; }
+.payment-close {
+  background:rgba(0,0,0,0.15); border:none; width:32px; height:32px;
+  border-radius:50%; cursor:pointer; font-size:16px; color:#0f1117;
+  display:flex; align-items:center; justify-content:center;
+}
+.payment-body { padding:1.5rem 1.75rem; }
+
+.plan-selector { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:1.5rem; }
+.plan-card {
+  border:2px solid rgba(64,196,200,0.15); border-radius:14px; padding:1rem 0.75rem;
+  text-align:center; cursor:pointer; transition:var(--transition); background:rgba(255,255,255,0.03);
+}
+.plan-card:hover { border-color:rgba(64,196,200,0.4); background:rgba(64,196,200,0.05); }
+.plan-card.selected { border-color:var(--teal); background:rgba(64,196,200,0.1); }
+.plan-subjects { font-size:11px; color:var(--silver); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+.plan-price { font-size:1.4rem; font-weight:800; color:var(--teal); line-height:1; }
+.plan-price-sub { font-size:10px; color:var(--silver); margin-top:2px; }
+.plan-features { font-size:11px; color:var(--silver-d); margin-top:8px; line-height:1.6; }
+
+.payment-divider { border:none; border-top:1px solid rgba(64,196,200,0.1); margin:1.25rem 0; }
+
+.payment-field { margin-bottom:1rem; }
+.payment-label { font-size:12px; font-weight:600; color:var(--silver); margin-bottom:6px; display:block; }
+.payment-input {
+  width:100%; padding:11px 14px; background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12); border-radius:10px;
+  color:var(--off-white); font-size:14px; font-family:var(--font-mono);
+  transition:var(--transition); box-sizing:border-box;
+}
+.payment-input:focus { outline:none; border-color:var(--teal); background:rgba(64,196,200,0.05); }
+.payment-input::placeholder { color:var(--silver-d); font-family:var(--font-body); }
+.payment-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+.order-summary {
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.25rem;
+}
+.order-row { display:flex; justify-content:space-between; font-size:13px; padding:5px 0; }
+.order-row.total { font-weight:700; color:var(--teal); border-top:1px solid rgba(64,196,200,0.15); margin-top:6px; padding-top:10px; font-size:14px; }
+.order-row span:first-child { color:var(--silver); }
+
+.payment-methods { display:flex; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap; }
+.pay-method-btn {
+  flex:1; min-width:120px; padding:10px 8px; border-radius:10px; cursor:pointer;
+  border:2px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);
+  color:var(--silver); font-size:12px; font-weight:600; transition:var(--transition);
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.pay-method-btn:hover { border-color:rgba(64,196,200,0.4); color:var(--off-white); }
+.pay-method-btn.active { border-color:var(--teal); color:var(--teal); background:rgba(64,196,200,0.08); }
+
+.bank-details-box {
+  background:rgba(64,196,200,0.06); border:1px solid rgba(64,196,200,0.2);
+  border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.25rem; font-size:13px;
+}
+.bank-row { display:flex; justify-content:space-between; padding:4px 0; color:var(--silver); }
+.bank-row strong { color:var(--off-white); }
+.bank-ref { background:rgba(64,196,200,0.1); border-radius:6px; padding:6px 10px; font-family:var(--font-mono); font-size:12px; color:var(--teal); margin-top:8px; text-align:center; word-break:break-all; }
+
+.pay-now-btn {
+  width:100%; padding:14px; font-size:15px; font-weight:800;
+  background:linear-gradient(135deg,#0d9488,#40c4c8); color:#0f1117;
+  border:none; border-radius:12px; cursor:pointer; transition:var(--transition);
+  letter-spacing:0.3px;
+}
+.pay-now-btn:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(64,196,200,0.4); }
+.pay-now-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+.payment-security { display:flex; align-items:center; justify-content:center; gap:6px; font-size:11px; color:var(--silver-d); margin-top:10px; }
+
+/* ─── EDUCATOR / TUTOR DASHBOARD ─────────────── */
+.educator-portal { display:none; }
+.educator-portal.active { display:block; }
+.upload-tabs { display:flex; gap:8px; margin-bottom:1.5rem; flex-wrap:wrap; }
+.upload-tab-btn {
+  padding:9px 18px; border-radius:10px; border:1px solid rgba(64,196,200,0.2);
+  background:rgba(255,255,255,0.03); color:var(--silver); font-size:13px;
+  font-weight:600; cursor:pointer; transition:var(--transition); font-family:var(--font-body);
+}
+.upload-tab-btn.active { background:rgba(64,196,200,0.12); border-color:var(--teal); color:var(--teal); }
+.material-list { display:flex; flex-direction:column; gap:10px; }
+.material-item {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:rgba(255,255,255,0.03); border:1px solid rgba(64,196,200,0.1);
+  border-radius:10px;
+}
+.material-icon { font-size:22px; flex-shrink:0; }
+.material-info { flex:1; min-width:0; }
+.material-name { font-size:13px; font-weight:600; color:var(--off-white); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.material-meta { font-size:11px; color:var(--silver); margin-top:2px; }
+.live-start-panel {
+  background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(220,38,38,0.05));
+  border:1px solid rgba(239,68,68,0.25); border-radius:14px; padding:1.5rem;
+  text-align:center;
+}
+
+/* ─── ENROL BUTTON STATES ────────────────────── */
+.enrol-btn.enrolled { background:var(--success); color:white; }
+.enrol-btn.pending  { background:rgba(251,146,60,0.8); color:white; }
+
+@media(max-width:768px){
+  .plan-selector { grid-template-columns:1fr; }
+  .payment-row { grid-template-columns:1fr; }
+  .payment-body { padding:1.25rem 1rem; }
+  .pay-method-btn { min-width:100px; }
+}
+
 </style>
   <!-- Leaflet.js CSS — required for map rendering -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -1735,15 +1879,49 @@ footer {
 
 <!-- Signup Modal -->
 <div class="modal-overlay hidden" id="signup-modal" onclick="closeModalOutside(event,'signup-modal')">
-  <div class="modal">
-    <div class="modal-title">Create Account</div>
-    <div class="modal-sub">Join Royal Mercy Institute · R100/month · R50 joining fee</div>
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title">Join Royal Mercy Institute</div>
+
+    <!-- Role selector tabs -->
+    <div style="display:flex;gap:4px;margin-bottom:1.25rem;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px">
+      <button id="tab-student" onclick="setSignupRole('learner')"
+        style="flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--font-body);background:linear-gradient(135deg,var(--teal-d),var(--teal));color:var(--charcoal);transition:var(--transition)">
+        🎓 Student
+      </button>
+      <button id="tab-educator" onclick="setSignupRole('tutor')"
+        style="flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--font-body);background:none;color:var(--silver);transition:var(--transition)">
+        👨‍🏫 Tutor / Mentor / Educator
+      </button>
+    </div>
+
     <div id="signup-alert"></div>
+
+    <div id="student-info-banner" style="background:rgba(64,196,200,0.08);border:1px solid rgba(64,196,200,0.2);border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:12px;color:var(--silver);line-height:1.8">
+      📋 <strong style="color:var(--teal)">Pricing:</strong> R50 once-off joining fee (non-refundable) &nbsp;·&nbsp; 2 subjects = R100/mo &nbsp;·&nbsp; 3 subjects = R110/mo<br>
+      🆔 You will receive a unique <strong style="color:var(--off-white)">Student ID</strong> (e.g. <code style="color:var(--teal)">RMI-STU-2025-0042</code>)
+    </div>
+    <div id="educator-info-banner" style="display:none;background:rgba(64,196,200,0.08);border:1px solid rgba(64,196,200,0.2);border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:12px;color:var(--silver);line-height:1.8">
+      📋 <strong style="color:var(--teal)">Educator Account:</strong> Upload PDFs, videos &amp; host live sessions.<br>
+      🆔 Unique <strong style="color:var(--off-white)">Educator ID</strong> assigned (e.g. <code style="color:var(--teal)">RMI-TUT-2025-0007</code>) — reviewed within 24 hrs.
+    </div>
+
+    <input type="hidden" id="signup-role" value="learner"/>
     <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="signup-name" placeholder="Thabo Dlamini"/></div>
     <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="signup-email" type="email" placeholder="thabo@email.com"/></div>
+    <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="signup-phone" type="tel" placeholder="082 123 4567"/></div>
+    <div id="educator-qual-field" style="display:none" class="form-group">
+      <label class="form-label">Qualification / Area of Expertise</label>
+      <input class="form-input" id="signup-qualification" placeholder="e.g. BSc Mathematics, 5 years teaching experience"/>
+    </div>
     <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="signup-password" type="password" placeholder="Min. 6 characters" onkeydown="if(event.key==='Enter')doSignup()"/></div>
-    <button class="btn-primary" onclick="doSignup()" style="width:100%;padding:12px;font-size:14px">Create Account</button>
-    <div style="text-align:center;margin-top:1rem;font-size:13px;color:var(--silver)">Already have an account? <span style="color:var(--teal);cursor:pointer" onclick="closeModal('signup-modal');openModal('login-modal')">Sign in</span></div>
+
+    <button class="btn-primary" onclick="doSignup()" id="signup-submit-btn" style="width:100%;padding:13px;font-size:14px;font-weight:700">
+      Create Student Account &amp; Proceed to Payment
+    </button>
+    <div style="text-align:center;margin-top:1rem;font-size:13px;color:var(--silver)">
+      Already have an account?
+      <span style="color:var(--teal);cursor:pointer" onclick="closeModal('signup-modal');openModal('login-modal')">Sign in</span>
+    </div>
   </div>
 </div>
 
@@ -1835,7 +2013,41 @@ footer {
     <div class="location-map-wrap">
       <div id="rmi-map" style="width:100%;height:380px;border-radius:12px;"></div>
     </div>
-  </div>
+  
+      <!-- Tutor / Mentor / Educator Portal -->
+      <div id="tutor-portal-section" style="display:none;margin-top:2rem">
+        <div class="card">
+          <div class="card-badge">Educator Portal</div>
+          <div class="card-title" style="margin-bottom:1rem">📚 Upload & Manage Learning Materials</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--silver);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Upload Materials</div>
+              <div class="upload-zone" onclick="document.getElementById('portal-file-input').click()" style="border:2px dashed rgba(64,196,200,0.3);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer">
+                <div style="font-size:2rem;margin-bottom:6px">📁</div>
+                <div style="font-size:13px;color:var(--silver)">PDFs, Videos, Slides</div>
+                <div style="font-size:11px;color:var(--silver-d);margin-top:4px">Max 500MB per file</div>
+                <input type="file" id="portal-file-input" style="display:none" multiple accept=".pdf,.mp4,.mov,.docx,.pptx" onchange="handlePortalUpload(this)"/>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--silver);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Live Session</div>
+              <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:1.25rem;text-align:center">
+                <div style="font-size:2rem;margin-bottom:8px">🔴</div>
+                <div style="font-size:13px;color:var(--silver);margin-bottom:10px">Start a live video class<br>learners can join in real time</div>
+                <button onclick="startPortalLive()" style="width:100%;padding:10px;background:linear-gradient(135deg,#dc2626,#ef4444);border:none;border-radius:8px;color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body)">
+                  🔴 Go Live Now
+                </button>
+              </div>
+            </div>
+          </div>
+          <div id="portal-upload-list" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div style="margin-top:1rem;padding:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(64,196,200,0.1);border-radius:10px;font-size:12px;color:var(--silver);line-height:1.7">
+            🆔 Your Educator ID: <strong style="color:var(--teal)" id="tutor-id-display">Loading...</strong><br>
+            Share this ID with students so they can search for you when booking sessions.
+          </div>
+        </div>
+      </div>
+</div>
 </section>
 
 <!-- ════════════ FOOTER ════════════ -->
@@ -2150,6 +2362,8 @@ async function loadHomeStats() {
 
 // ─── Dashboard ────────────────────────────────────
 async function loadDashboard() {
+  updateDashboardForRole();
+  updateTutorIdDisplay();
   if (!state.user) { navigate('home'); return; }
   document.getElementById('dash-name').textContent = state.user.name.split(' ')[0];
   document.getElementById('dash-role').textContent = state.user.role;
@@ -2394,6 +2608,280 @@ updateNavAuth();
 updateMobileAuth();
 loadHomeStats();
 if (state.user) document.getElementById('dash-name').textContent = state.user.name.split(' ')[0];
+
+
+// ═══════════════════════════════════════════════════════════════
+// ROLE-BASED SIGNUP
+// ═══════════════════════════════════════════════════════════════
+
+function setSignupRole(role) {
+  document.getElementById('signup-role').value = role;
+  const isStudent = role === 'learner';
+  // Toggle banners
+  document.getElementById('student-info-banner').style.display  = isStudent ? 'block' : 'none';
+  document.getElementById('educator-info-banner').style.display = isStudent ? 'none'  : 'block';
+  // Toggle educator extra field
+  document.getElementById('educator-qual-field').style.display  = isStudent ? 'none'  : 'block';
+  // Toggle tab styles
+  var teal = 'linear-gradient(135deg,var(--teal-d),var(--teal))';
+  var none = 'none';
+  document.getElementById('tab-student').style.background  = isStudent ? teal : none;
+  document.getElementById('tab-student').style.color       = isStudent ? 'var(--charcoal)' : 'var(--silver)';
+  document.getElementById('tab-educator').style.background = isStudent ? none : teal;
+  document.getElementById('tab-educator').style.color      = isStudent ? 'var(--silver)' : 'var(--charcoal)';
+  // Button label
+  document.getElementById('signup-submit-btn').textContent =
+    isStudent ? 'Create Student Account & Proceed to Payment'
+              : 'Apply as Tutor / Mentor / Educator';
+}
+
+// Generate unique IDs
+function generateUserId(role, existingCount) {
+  var year = new Date().getFullYear();
+  var num  = String(existingCount + 1).padStart(4, '0');
+  if (role === 'tutor')   return 'RMI-TUT-' + year + '-' + num;
+  if (role === 'admin')   return 'RMI-ADM-' + year + '-' + num;
+  return 'RMI-STU-' + year + '-' + num;
+}
+
+// Override doSignup to use new fields + open payment for students
+async function doSignup() {
+  var name    = document.getElementById('signup-name').value.trim();
+  var email   = document.getElementById('signup-email').value.trim();
+  var phone   = (document.getElementById('signup-phone') || {}).value || '';
+  var qual    = (document.getElementById('signup-qualification') || {}).value || '';
+  var password= document.getElementById('signup-password').value;
+  var role    = document.getElementById('signup-role').value || 'learner';
+  var alertEl = document.getElementById('signup-alert');
+  alertEl.innerHTML = '';
+
+  if (!name || !email || !password) {
+    alertEl.innerHTML = '<div class="alert alert-error">Please fill in all required fields.</div>';
+    return;
+  }
+  if (password.length < 6) {
+    alertEl.innerHTML = '<div class="alert alert-error">Password must be at least 6 characters.</div>';
+    return;
+  }
+
+  try {
+    var data = await apiFetch('/api/auth/signup', 'POST', { name, email, password, role, phone, qualification: qual });
+    state.user  = data.user;
+    state.token = data.token;
+    localStorage.setItem('rmi_token', data.token);
+    localStorage.setItem('rmi_user',  JSON.stringify(data.user));
+    updateNavAuth();
+    closeModal('signup-modal');
+
+    if (role === 'learner') {
+      // Students go straight to payment
+      openPayment(data.user);
+    } else {
+      // Educators/tutors go to dashboard
+      showToast('✅ Educator application submitted! You will be notified within 24 hours.', 'success');
+      navigate('dashboard');
+    }
+  } catch(err) {
+    alertEl.innerHTML = '<div class="alert alert-error">' + err.message + '</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAYMENT SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+var paymentState = {
+  plan: 2,
+  user: null,
+  method: 'card'
+};
+
+var plans = {
+  2:   { monthly: 100, joining: 50, total: 150, label: '2 Subjects' },
+  3:   { monthly: 110, joining: 50, total: 160, label: '3 Subjects' },
+  '3p':{ monthly: 200, joining: 0,  total: 200, label: '3 Subjects Premium' }
+};
+
+function openPayment(user) {
+  paymentState.user = user || state.user;
+  paymentState.plan = 2;
+  selectPlan(2);
+  setPayMethod('card');
+  // Set EFT reference
+  var ref = document.getElementById('eft-reference');
+  if (ref && paymentState.user) ref.textContent = paymentState.user.rmiId || paymentState.user.id;
+  document.getElementById('payment-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePayment() {
+  document.getElementById('payment-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function selectPlan(plan) {
+  paymentState.plan = plan;
+  var p = plans[plan];
+  // Update summary
+  document.getElementById('sum-monthly').textContent = 'R' + p.monthly.toFixed(2);
+  document.getElementById('sum-joining').textContent = p.joining ? 'R' + p.joining.toFixed(2) : 'Waived';
+  document.getElementById('sum-total').textContent   = 'R' + p.total.toFixed(2);
+  // Update pay button
+  document.getElementById('pay-submit-btn').textContent = '🔒 Pay Securely — R' + p.total.toFixed(2);
+  // SnapScan amount
+  var ss = document.getElementById('snapscan-amount');
+  if (ss) ss.textContent = 'R' + p.total.toFixed(2);
+  // Highlight selected plan
+  [2, 3, '3p'].forEach(function(k) {
+    var el = document.getElementById('plan-' + k);
+    if (el) el.classList.toggle('selected', k === plan);
+  });
+}
+
+function setPayMethod(method) {
+  paymentState.method = method;
+  document.getElementById('pay-card-section').style.display    = method === 'card'     ? 'block' : 'none';
+  document.getElementById('pay-eft-section').style.display     = method === 'eft'      ? 'block' : 'none';
+  document.getElementById('pay-snapscan-section').style.display= method === 'snapscan' ? 'block' : 'none';
+
+  ['card','eft','snapscan'].forEach(function(m) {
+    var btn = document.getElementById('pm-' + m);
+    if (!btn) return;
+    var active = m === method;
+    btn.style.border     = active ? '1.5px solid var(--teal)' : '1.5px solid rgba(255,255,255,0.1)';
+    btn.style.background = active ? 'rgba(64,196,200,0.1)' : 'none';
+    btn.style.color      = active ? 'var(--teal)' : 'var(--silver)';
+  });
+
+  var label = method === 'card' ? '🔒 Pay Securely' : method === 'eft' ? '✅ Confirm EFT Payment' : '📱 I Have Paid via SnapScan';
+  var p = plans[paymentState.plan];
+  document.getElementById('pay-submit-btn').textContent = label + ' — R' + p.total.toFixed(2);
+}
+
+function formatCardNum(input) {
+  var v = input.value.replace(/\D/g, '').substring(0, 16);
+  input.value = v.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function formatExpiry(input) {
+  var v = input.value.replace(/\D/g, '').substring(0, 4);
+  if (v.length >= 2) v = v.slice(0,2) + ' / ' + v.slice(2);
+  input.value = v;
+}
+
+function submitPayment() {
+  var method = paymentState.method;
+  var p = plans[paymentState.plan];
+  var btn = document.getElementById('pay-submit-btn');
+
+  // Validate card fields
+  if (method === 'card') {
+    var num  = (document.getElementById('pay-card-num') || {}).value || '';
+    var name = (document.getElementById('pay-name') || {}).value || '';
+    var exp  = (document.getElementById('pay-expiry') || {}).value || '';
+    var cvv  = (document.getElementById('pay-cvv') || {}).value || '';
+    if (!name || num.replace(/\s/g,'').length < 16 || exp.length < 4 || cvv.length < 3) {
+      showToast('Please complete all card details.', 'error');
+      return;
+    }
+  }
+
+  // Simulate processing
+  btn.textContent = '⏳ Processing...';
+  btn.disabled = true;
+
+  setTimeout(function() {
+    btn.disabled = false;
+    closePayment();
+
+    // Generate student ID & show success
+    var user = paymentState.user || state.user;
+    var studentId = user ? (user.rmiId || generateUserId('learner', Math.floor(Math.random() * 100) + 1)) : 'RMI-STU-2025-0001';
+
+    document.getElementById('success-student-id').textContent = studentId;
+    document.getElementById('success-message').innerHTML =
+      'Welcome to Royal Mercy Institute! Your Student ID is<br>' +
+      '<strong style="color:var(--teal);font-size:1.1rem">' + studentId + '</strong><br>' +
+      '<span style="font-size:11px">Save this ID. Plan: <strong>' + plans[paymentState.plan].label + '</strong> · Paid: <strong>R' + p.total + '</strong></span>';
+
+    document.getElementById('payment-success-overlay').classList.add('open');
+
+    // Record payment in state
+    if (user) {
+      state.enrolledIds = state.enrolledIds || [];
+      localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
+      localStorage.setItem('rmi_plan', JSON.stringify({ plan: paymentState.plan, date: new Date().toISOString(), amount: p.total }));
+    }
+
+    showToast('✅ Payment successful! Welcome to RMI.', 'success');
+  }, 2200);
+}
+
+function closePaymentSuccess() {
+  document.getElementById('payment-success-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  navigate('dashboard');
+}
+
+// Open payment from enrol button
+function openEnrolPayment(courseId) {
+  if (!state.user) { openModal('login-modal'); showToast('Please sign in to enrol.', 'info'); return; }
+  if (state.user.role !== 'learner') { showToast('Only students can enrol in courses.', 'info'); return; }
+  openPayment(state.user);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ROLE-BASED ACCESS CONTROL
+// ═══════════════════════════════════════════════════════════════
+
+// Patch renderCourses to use role-based buttons
+var _origRenderCourses = window.renderCourses;
+
+// Guard course actions by role
+function canEnrol() {
+  return state.user && state.user.role === 'learner';
+}
+function isTutor() {
+  return state.user && (state.user.role === 'tutor' || state.user.role === 'mentor' || state.user.role === 'educator');
+}
+function isAdmin() {
+  return state.user && state.user.role === 'admin';
+}
+
+// Show/hide tutor portal in dashboard based on role
+function updateDashboardForRole() {
+  if (!state.user) return;
+  var tutorSection = document.getElementById('tutor-portal-section');
+  var adminSection = document.getElementById('admin-add-course');
+  if (tutorSection) tutorSection.style.display = isTutor() ? 'block' : 'none';
+  if (adminSection) adminSection.style.display  = isAdmin() ? 'block' : 'none';
+}
+
+// Override toggleEnroll to gate behind payment
+function toggleEnroll(id, btn) {
+  if (!state.user) { openModal('login-modal'); showToast('Please sign in to enrol.', 'info'); return; }
+  if (state.user.role !== 'learner') { showToast('Only registered students can enrol in courses.', 'info'); return; }
+  // Check if already enrolled
+  if (state.enrolledIds && state.enrolledIds.includes(id)) {
+    state.enrolledIds = state.enrolledIds.filter(function(e){ return e !== id; });
+    localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
+    btn.textContent = 'Enrol — R100/mo';
+    btn.classList.remove('enrolled');
+    showToast('Unenrolled from course.', 'info');
+  } else {
+    // Gate: must have paid
+    var plan = JSON.parse(localStorage.getItem('rmi_plan') || 'null');
+    if (!plan) { openEnrolPayment(id); return; }
+    if (!state.enrolledIds) state.enrolledIds = [];
+    state.enrolledIds.push(id);
+    localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
+    btn.textContent = '✓ Enrolled';
+    btn.classList.add('enrolled');
+    showToast('✅ Successfully enrolled!', 'success');
+  }
+}
+
+
 </script>
 
 <!-- Leaflet.js interactive map -->
@@ -2494,6 +2982,35 @@ if (state.user) document.getElementById('dash-name').textContent = state.user.na
 </div>
 
 
+<script>
+function handlePortalUpload(input) {
+  var list = document.getElementById('portal-upload-list');
+  if (!list) return;
+  Array.from(input.files).forEach(function(file) {
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(64,196,200,0.15);border-radius:8px;font-size:13px';
+    var icon = file.type.includes('pdf') ? '📄' : file.type.includes('video') ? '🎬' : '📁';
+    div.innerHTML = icon + ' <span style="flex:1;color:var(--off-white)">' + file.name + '</span><span style="color:var(--teal);font-weight:600">Uploaded ✓</span>';
+    list.appendChild(div);
+  });
+  showToast('✅ ' + input.files.length + ' file(s) uploaded successfully!', 'success');
+}
+
+function startPortalLive() {
+  if (!isTutor()) { showToast('Only educators can start live sessions.', 'error'); return; }
+  showToast('🔴 Your live session is now active! Learners can join from the Courses page.', 'success');
+}
+
+// Update tutor ID display in dashboard
+function updateTutorIdDisplay() {
+  var el = document.getElementById('tutor-id-display');
+  if (el && state.user) {
+    el.textContent = state.user.rmiId || generateUserId(state.user.role, parseInt(state.user.id) || 1);
+  }
+}
+
+</script>
+
 <!-- Leaflet Map -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -2566,6 +3083,153 @@ if (state.user) document.getElementById('dash-name').textContent = state.user.na
   });
 })();
 </script>
+
+
+<!-- ═══════════════════════════════════════════════
+     PAYMENT MODAL
+════════════════════════════════════════════════ -->
+<div class="payment-overlay" id="payment-overlay">
+  <div class="payment-modal">
+
+    <!-- Header -->
+    <div class="payment-header">
+      <div>
+        <div class="payment-header-title">🔒 Secure Enrolment Payment</div>
+        <div class="payment-header-sub">Royal Mercy Institute · Vanderbijlpark, SA</div>
+      </div>
+      <button class="payment-close" onclick="closePayment()">✕</button>
+    </div>
+
+    <div class="payment-body">
+
+      <!-- Plan selector -->
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--silver);margin-bottom:10px">Choose Your Plan</div>
+      <div class="plan-selector">
+        <div class="plan-card selected" id="plan-2" onclick="selectPlan(2)">
+          <div class="plan-subjects">2 Subjects</div>
+          <div class="plan-price">R100</div>
+          <div class="plan-price-sub">/month</div>
+          <div class="plan-features">+ R50 joining fee<br>(once-off, 2 months)</div>
+        </div>
+        <div class="plan-card" id="plan-3" onclick="selectPlan(3)">
+          <div class="plan-subjects">3 Subjects</div>
+          <div class="plan-price">R110</div>
+          <div class="plan-price-sub">/month</div>
+          <div class="plan-features">+ R50 joining fee<br>(once-off, 2 months)</div>
+        </div>
+        <div class="plan-card" id="plan-3p" onclick="selectPlan('3p')">
+          <div class="plan-subjects">3 Subjects</div>
+          <div class="plan-price">R200</div>
+          <div class="plan-price-sub">/month</div>
+          <div class="plan-features">Premium · No joining<br>fee · Billed monthly</div>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div class="order-summary" id="order-summary">
+        <div class="order-row"><span>Monthly subscription</span><span id="sum-monthly">R100.00</span></div>
+        <div class="order-row"><span>Once-off joining fee</span><span id="sum-joining">R50.00</span></div>
+        <div class="order-row total"><span>Total due today</span><span id="sum-total">R150.00</span></div>
+        <div style="font-size:11px;color:var(--silver);margin-top:8px">⚠️ The joining fee of R50 is non-refundable and covers 2 months.</div>
+      </div>
+
+      <hr class="payment-divider"/>
+
+      <!-- Payment method tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:1.25rem">
+        <button class="pay-method-btn active" id="pm-card" onclick="setPayMethod('card')" style="flex:1;padding:9px;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--font-body);border:1.5px solid var(--teal);background:rgba(64,196,200,0.1);color:var(--teal);cursor:pointer">💳 Card</button>
+        <button class="pay-method-btn" id="pm-eft" onclick="setPayMethod('eft')" style="flex:1;padding:9px;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--font-body);border:1.5px solid rgba(255,255,255,0.1);background:none;color:var(--silver);cursor:pointer">🏦 EFT / Bank Transfer</button>
+        <button class="pay-method-btn" id="pm-snapscan" onclick="setPayMethod('snapscan')" style="flex:1;padding:9px;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--font-body);border:1.5px solid rgba(255,255,255,0.1);background:none;color:var(--silver);cursor:pointer">📱 SnapScan</button>
+      </div>
+
+      <!-- Card payment fields -->
+      <div id="pay-card-section">
+        <div class="payment-field">
+          <label class="payment-label">Cardholder Name</label>
+          <input class="payment-input" id="pay-name" placeholder="As it appears on your card"/>
+        </div>
+        <div class="payment-field">
+          <label class="payment-label">Card Number</label>
+          <input class="payment-input" id="pay-card-num" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCardNum(this)"/>
+        </div>
+        <div class="payment-row">
+          <div class="payment-field">
+            <label class="payment-label">Expiry Date</label>
+            <input class="payment-input" id="pay-expiry" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)"/>
+          </div>
+          <div class="payment-field">
+            <label class="payment-label">CVV</label>
+            <input class="payment-input" id="pay-cvv" placeholder="•••" maxlength="4" type="password"/>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;font-size:11px;color:var(--silver)">
+          <span style="color:var(--teal)">🔒</span>
+          256-bit SSL encrypted · Powered by Paystack (South Africa)
+          <span style="margin-left:auto;display:flex;gap:6px">
+            <span style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">VISA</span>
+            <span style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">MC</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- EFT section -->
+      <div id="pay-eft-section" style="display:none">
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(64,196,200,0.2);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem">
+          <div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:12px">🏦 RMI Business Bank Account</div>
+          <div style="font-size:13px;line-height:2.2;color:var(--off-white)" id="bank-details-display">
+            <div><span style="color:var(--silver);font-size:11px">BANK</span><br><strong>[Bank name — to be added by admin]</strong></div>
+            <div><span style="color:var(--silver);font-size:11px">ACCOUNT HOLDER</span><br><strong>Royal Mercy Institute</strong></div>
+            <div><span style="color:var(--silver);font-size:11px">ACCOUNT NUMBER</span><br><strong>[Account number — to be added by admin]</strong></div>
+            <div><span style="color:var(--silver);font-size:11px">BRANCH CODE</span><br><strong>[Branch code — to be added by admin]</strong></div>
+            <div><span style="color:var(--silver);font-size:11px">REFERENCE</span><br><strong id="eft-reference">RMI-[YOUR-ID]</strong></div>
+          </div>
+        </div>
+        <div style="background:rgba(64,196,200,0.06);border:1px solid rgba(64,196,200,0.15);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--silver);margin-bottom:1rem;line-height:1.7">
+          ✅ After payment, email your proof of payment to <strong style="color:var(--teal)">royalmercyinstitute@gmail.com</strong> with your ID as the subject. Your account will be activated within 24 hours.
+        </div>
+      </div>
+
+      <!-- SnapScan section -->
+      <div id="pay-snapscan-section" style="display:none">
+        <div style="text-align:center;padding:1rem">
+          <div style="width:160px;height:160px;margin:0 auto 1rem;background:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#333;padding:12px;box-sizing:border-box">
+            [SnapScan QR Code]<br><span style="font-size:10px;color:#999">Admin: replace with your SnapScan QR</span>
+          </div>
+          <div style="font-size:13px;color:var(--silver)">Scan with the SnapScan app to pay</div>
+          <div style="font-size:12px;color:var(--silver);margin-top:6px">Amount: <strong style="color:var(--teal)" id="snapscan-amount">R150.00</strong></div>
+          <div style="font-size:11px;color:var(--silver-d);margin-top:8px">Send screenshot to royalmercyinstitute@gmail.com</div>
+        </div>
+      </div>
+
+      <!-- Pay button -->
+      <button id="pay-submit-btn" onclick="submitPayment()" style="width:100%;padding:14px;background:linear-gradient(135deg,#0d9488,#40c4c8);border:none;border-radius:12px;color:#0f1117;font-size:15px;font-weight:800;font-family:var(--font-body);cursor:pointer;transition:var(--transition);letter-spacing:0.3px">
+        🔒 Pay Securely — R150.00
+      </button>
+
+      <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--silver-d)">
+        Protected by 256-bit encryption · PCI DSS compliant · South African payments
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Success Modal -->
+<div class="payment-overlay" id="payment-success-overlay" style="z-index:3100">
+  <div class="payment-modal" style="max-width:420px;text-align:center">
+    <div style="padding:2rem 1.75rem">
+      <div style="font-size:4rem;margin-bottom:1rem">✅</div>
+      <div style="font-size:1.3rem;font-weight:800;color:var(--teal);margin-bottom:8px">Payment Confirmed!</div>
+      <div style="font-size:13px;color:var(--silver);line-height:1.7;margin-bottom:1.5rem" id="success-message">
+        Welcome to Royal Mercy Institute. Your Student ID is<br>
+        <strong style="color:var(--teal);font-size:1.1rem" id="success-student-id">RMI-STU-2025-0001</strong><br>
+        <span style="font-size:11px">Save this ID — you will need it to log in and access materials.</span>
+      </div>
+      <button onclick="closePaymentSuccess()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--teal-d),var(--teal));border:none;border-radius:10px;color:var(--charcoal);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-body)">
+        Go to My Dashboard →
+      </button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
