@@ -5,7 +5,218 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Royal Mercy Institute | Science & Technology</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js">
+
+// ═══════════════════════════════════════════════════════════════
+// COURSE MODAL — Tutorials, Tutor Booking, Live Sessions
+// ═══════════════════════════════════════════════════════════════
+
+const COURSE_PDFS = {
+  // Programming
+  'Introduction to Python':       [{name:'Chapter 1 — Variables & Data Types', pages:24},{name:'Chapter 2 — Control Flow',pages:18},{name:'Chapter 3 — Functions & Modules',pages:22},{name:'Chapter 4 — OOP Basics',pages:28},{name:'Practice Exercises Pack',pages:35}],
+  'Web Development Fundamentals': [{name:'HTML Foundations',pages:20},{name:'CSS Styling & Layouts',pages:26},{name:'JavaScript Basics',pages:30},{name:'Responsive Design',pages:18},{name:'Project: Build a Portfolio',pages:15}],
+  'Data Science & Analytics':     [{name:'Intro to Pandas & NumPy',pages:32},{name:'Data Visualisation with Matplotlib',pages:24},{name:'Statistical Analysis',pages:28},{name:'SA Dataset Projects',pages:20}],
+  'Mobile App Development':       [{name:'Flutter Setup & Dart Basics',pages:22},{name:'Widgets & UI',pages:28},{name:'State Management',pages:24},{name:'Publishing Your App',pages:16}],
+  'AI & Machine Learning':        [{name:'ML Fundamentals',pages:36},{name:'Supervised Learning',pages:30},{name:'Neural Networks',pages:34},{name:'African AI Use Cases',pages:22}],
+  'Cybersecurity Essentials':     [{name:'Threats & Vulnerabilities',pages:24},{name:'Network Security',pages:28},{name:'Ethical Hacking Intro',pages:22},{name:'Digital Safety for Communities',pages:18}],
+  'Computer Applications Technology (CAT)': [{name:'Hardware & Software (Gr 10)',pages:26},{name:'Networking Fundamentals',pages:22},{name:'Data Handling & Spreadsheets',pages:30},{name:'HTML & Internet',pages:20},{name:'Exam Prep Pack',pages:40}],
+  // Sciences
+  'Physical Sciences — Physics':  [{name:'Mechanics — Forces & Motion',pages:32},{name:'Waves, Sound & Light',pages:28},{name:'Electricity & Magnetism',pages:34},{name:'Nuclear Physics',pages:18},{name:'Exam Papers & Memos',pages:50}],
+  'Physical Sciences — Chemistry':[{name:'Atomic Structure & Periodic Table',pages:28},{name:'Chemical Bonding',pages:24},{name:'Reaction Rates & Equilibrium',pages:26},{name:'Organic Chemistry',pages:32},{name:'Exam Papers & Memos',pages:50}],
+  'Mathematics':                  [{name:'Algebra & Equations (Gr 8–10)',pages:40},{name:'Functions & Graphs',pages:36},{name:'Trigonometry',pages:30},{name:'Calculus — Differentiation',pages:28},{name:'Statistics & Probability',pages:24},{name:'Exam Papers & Memos',pages:60}],
+  'Mathematical Literacy':        [{name:'Finance & Banking',pages:22},{name:'Measurement & Maps',pages:20},{name:'Data Handling',pages:18},{name:'Patterns & Relationships',pages:16}],
+  'Life Sciences':                [{name:'Cell Biology',pages:26},{name:'Genetics & Heredity',pages:30},{name:'Evolution',pages:22},{name:'Biosphere & Ecology',pages:24},{name:'Exam Papers & Memos',pages:48}],
+  'Geography':                    [{name:'Climatology & Weather',pages:28},{name:'Geomorphology',pages:24},{name:'Mapwork & GIS',pages:22},{name:'Rural & Urban Development',pages:20},{name:'Exam Papers & Memos',pages:44}],
+  // Primary
+  'Natural Sciences (Gr 4–7)':    [{name:'Life & Living',pages:18},{name:'Matter & Materials',pages:16},{name:'Energy & Change',pages:14},{name:'Earth & Beyond',pages:16}],
+  'Technology (Gr 4–9)':          [{name:'The Design Process',pages:14},{name:'Structures',pages:12},{name:'Processing & Systems',pages:16},{name:'Project: Build & Present',pages:12}],
+  'Social Sciences (Gr 4–7)':     [{name:'History — Our Past',pages:16},{name:'History — World Events',pages:16},{name:'Geography — Maps',pages:14},{name:'Geography — Environments',pages:14}],
+  'Robotics — Primary (Gr 4–7)':  [{name:'Intro to Block Coding',pages:14},{name:'Building Simple Robots',pages:16},{name:'Scratch Programming',pages:18},{name:'Mini Project: My First Robot',pages:12}],
+  'Robotics — High School (Gr 8–12)':[{name:'Arduino & Sensors',pages:24},{name:'Python for Robotics',pages:28},{name:'Line Following & Obstacle Avoidance',pages:20},{name:'Competition Project Guide',pages:18}],
+  'Robotics — University':        [{name:'ROS Fundamentals',pages:36},{name:'Computer Vision with OpenCV',pages:32},{name:'Path Planning & SLAM',pages:30},{name:'Autonomous Systems Design',pages:28}],
+};
+
+const COURSE_TUTORS = [
+  { name:'Mohau Mokoena',  subjects:'All STEM Subjects',  rating:'⭐ 5.0 (Founder)',  initials:'MM' },
+  { name:'Lesedi Masha',   subjects:'Mathematics, Sciences', rating:'⭐ 4.9 (38 sessions)', initials:'LM' },
+  { name:'Sebabatso N.',   subjects:'Life Sciences, Geography', rating:'⭐ 4.8 (24 sessions)', initials:'SN' },
+  { name:'Thabo K.',       subjects:'Physics, Chemistry',   rating:'⭐ 4.7 (31 sessions)', initials:'TK' },
+  { name:'Aisha P.',       subjects:'Robotics, CAT, Coding', rating:'⭐ 4.9 (45 sessions)', initials:'AP' },
+  { name:'Neo D.',         subjects:'Primary Sciences, Tech', rating:'⭐ 4.8 (19 sessions)', initials:'ND' },
+,
+  { id: '7',  title: 'Computer Applications Technology (CAT)',     category: 'CAT',           level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 76,  description: 'CAPS-aligned CAT: hardware, software, networking, data handling for Gr 10-12.', createdAt: new Date().toISOString() },
+  { id: '8',  title: 'Physical Sciences - Physics',                category: 'Physics',       level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 61,  description: 'CAPS Physics: mechanics, waves, electricity and magnetism for Gr 10-12.', createdAt: new Date().toISOString() },
+  { id: '9',  title: 'Physical Sciences - Chemistry',              category: 'Chemistry',     level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 54,  description: 'CAPS Chemistry: atomic structure, equations, organic chemistry for Gr 10-12.', createdAt: new Date().toISOString() },
+  { id: '10', title: 'Mathematics',                                category: 'Mathematics',   level: 'Beginner',     duration: '12 weeks', instructor: 'Mohau Mokoena', enrolled: 118, description: 'CAPS Mathematics: algebra, calculus, trigonometry, statistics for Gr 8-12.', createdAt: new Date().toISOString() },
+  { id: '11', title: 'Mathematical Literacy',                      category: 'Mathematics',   level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 93,  description: 'Practical maths for everyday life and careers. Gr 10-12 CAPS aligned.', createdAt: new Date().toISOString() },
+  { id: '12', title: 'Life Sciences',                              category: 'Life Sciences', level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 72,  description: 'CAPS Life Sciences: cells, genetics, evolution, biosphere for Gr 10-12.', createdAt: new Date().toISOString() },
+  { id: '13', title: 'Geography',                                  category: 'Geography',     level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 48,  description: 'CAPS Geography: climate, geomorphology, mapwork, development for Gr 10-12.', createdAt: new Date().toISOString() },
+  { id: '14', title: 'Natural Sciences (Gr 4-7)',                  category: 'Primary',       level: 'Beginner',     duration: '6 weeks',  instructor: 'Mohau Mokoena', enrolled: 83,  description: 'CAPS Natural Sciences: life, matter, energy, earth for intermediate phase.', createdAt: new Date().toISOString() },
+  { id: '15', title: 'Technology (Gr 4-9)',                        category: 'Primary',       level: 'Beginner',     duration: '6 weeks',  instructor: 'Mohau Mokoena', enrolled: 69,  description: 'CAPS Technology: design, structures, systems for intermediate and senior phase.', createdAt: new Date().toISOString() },
+  { id: '16', title: 'Social Sciences (Gr 4-7)',                   category: 'Primary',       level: 'Beginner',     duration: '6 weeks',  instructor: 'Mohau Mokoena', enrolled: 57,  description: 'History and Geography for intermediate phase. CAPS aligned.', createdAt: new Date().toISOString() },
+  { id: '17', title: 'Robotics - Primary (Gr 4-7)',                category: 'Robotics',      level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 44,  description: 'Block coding, computational thinking and robot building for primary learners.', createdAt: new Date().toISOString() },
+  { id: '18', title: 'Robotics - High School (Gr 8-12)',           category: 'Robotics',      level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 38,  description: 'Arduino, sensors, Python robotics and STEM project work for high school.', createdAt: new Date().toISOString() },
+  { id: '19', title: 'Robotics - University',                      category: 'Robotics',      level: 'Advanced',     duration: '12 weeks', instructor: 'Mohau Mokoena', enrolled: 22,  description: 'ROS, computer vision, autonomous systems for university students.', createdAt: new Date().toISOString() }
+];
+
+function openCourseModal(course) {
+  const c = typeof course === 'string' ? JSON.parse(course) : course;
+  document.getElementById('cmod-title').textContent    = c.title;
+  document.getElementById('cmod-category').textContent = c.category + ' · ' + c.level;
+  document.getElementById('cmod-meta').textContent     = '⏱ ' + c.duration + '  ·  👥 ' + c.enrolled + ' enrolled  ·  👨‍🏫 ' + c.instructor;
+  document.getElementById('cmod-desc').textContent     = c.description;
+
+  // Build PDF list
+  const pdfs = COURSE_PDFS[c.title] || [{name:'Study Guide — ' + c.title, pages:20},{name:'Practice Questions', pages:15}];
+  document.getElementById('cmod-pdf-list').innerHTML = pdfs.map((p,i) => `
+    <div class="pdf-item" onclick="viewPDF('${encodeURIComponent(p.name)}','${i}')">
+      <div class="pdf-icon">📄</div>
+      <div class="pdf-info">
+        <div class="pdf-name">${p.name}</div>
+        <div class="pdf-meta">PDF · ${p.pages} pages · Click to preview</div>
+      </div>
+      <span style="font-size:12px;color:var(--teal);font-weight:600">▶ Open</span>
+    </div>`).join('');
+  document.getElementById('pdf-viewer-wrap').style.display = 'none';
+
+  // Build tutor grid
+  document.getElementById('cmod-tutor-grid').innerHTML = COURSE_TUTORS.map(t => `
+    <div class="tutor-card">
+      <div class="tutor-avatar-lg">${t.initials}</div>
+      <div class="tutor-name-lg">${t.name}</div>
+      <div class="tutor-subject">${t.subjects}</div>
+      <div class="tutor-rating">${t.rating}</div>
+      <button class="book-btn" onclick="bookTutor('${t.name}','${c.title}')">Book Session</button>
+    </div>`).join('');
+
+  // Build live sessions list
+  const liveItems = [
+    { tutor:'Mohau Mokoena', topic: c.title + ' — Live Q&A', time:'Today 18:00', live:true },
+    { tutor:'Aisha P.',      topic: c.title + ' — Problem Solving', time:'Tomorrow 15:00', live:false },
+    { tutor:'Thabo K.',      topic: c.title + ' — Exam Prep',       time:'Sat 10:00', live:false },
+  ];
+  document.getElementById('cmod-live-sessions').innerHTML = liveItems.map(s => `
+    <div class="live-card">
+      ${s.live ? '<span class="live-badge">LIVE</span>' : '<span style="font-size:11px;font-weight:700;color:var(--silver);text-transform:uppercase;padding:3px 8px;border:1px solid rgba(255,255,255,0.15);border-radius:4px">Upcoming</span>'}
+      <div class="live-info">
+        <div class="live-title">${s.topic}</div>
+        <div class="live-meta">👨‍🏫 ${s.tutor}  ·  🕐 ${s.time}</div>
+      </div>
+      ${s.live
+        ? '<button class="join-live-btn" onclick="joinLiveSession(this)">Join Now</button>'
+        : '<button style="padding:8px 14px;font-size:12px;font-weight:600;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--silver);border-radius:8px;cursor:pointer" onclick="setReminder(this)">🔔 Remind Me</button>'
+      }`).join('</div>');
+
+  // Show tutor upload tab if tutor
+  const uploadTab = document.getElementById('tutor-upload-tab');
+  if (uploadTab) uploadTab.style.display = state.user?.role === 'tutor' ? 'block' : 'none';
+
+  // Reset to first tab
+  switchCourseTab('tutorials', document.querySelector('.course-tab'));
+  document.getElementById('course-detail-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCourseModal() {
+  document.getElementById('course-detail-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function switchCourseTab(tab, el) {
+  document.querySelectorAll('.course-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.course-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('ctab-' + tab).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+function viewPDF(name, idx) {
+  // Show a Google Docs PDF viewer with a placeholder SA curriculum PDF
+  const samplePdfs = [
+    'https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF1',
+  ];
+  const wrap = document.getElementById('pdf-viewer-wrap');
+  const frame = document.getElementById('pdf-viewer-frame');
+  // Use Google Docs viewer with a sample curriculum PDF
+  const pdfUrl = 'https://www.education.gov.za/Portals/0/Documents/Publications/2011/Gr10-12%20CAPS%20Maths.pdf';
+  frame.src = 'https://docs.google.com/viewer?url=' + encodeURIComponent(pdfUrl) + '&embedded=true';
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  showToast('Opening: ' + decodeURIComponent(name), 'success');
+}
+
+function bookTutor(tutorName, courseTitle) {
+  if (!state.user) {
+    closeCourseModal();
+    openModal('login-modal');
+    showToast('Please log in to book a tutor.', 'error');
+    return;
+  }
+  showToast('✅ Booking request sent to ' + tutorName + '! They will contact you within 24 hrs via WhatsApp.', 'success');
+}
+
+function joinLiveSession(btn) {
+  if (!state.user) {
+    closeCourseModal();
+    openModal('login-modal');
+    return;
+  }
+  btn.textContent = '✓ Joined';
+  btn.style.background = '#16a34a';
+  btn.disabled = true;
+  document.getElementById('live-chat-input').disabled = false;
+  document.getElementById('live-chat-box').innerHTML = '<div style="color:var(--teal);font-weight:600">You joined the live session! Ask your questions below.</div>';
+  showToast('🔴 You joined the live session!', 'success');
+}
+
+function setReminder(btn) {
+  btn.textContent = '✓ Reminder Set';
+  btn.style.borderColor = 'var(--teal)';
+  btn.style.color = 'var(--teal)';
+  showToast('🔔 We will remind you before the session starts.', 'success');
+}
+
+function sendLiveQuestion() {
+  if (!state.user) return;
+  const input = document.getElementById('live-chat-input');
+  const box   = document.getElementById('live-chat-box');
+  const text  = input.value.trim();
+  if (!text) return;
+  const initials = state.user.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  const div = document.createElement('div');
+  div.style.cssText = 'margin:6px 0;padding:6px 10px;background:rgba(64,196,200,0.1);border-radius:6px';
+  div.innerHTML = '<strong style="color:var(--teal)">' + initials + ':</strong> ' + text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  input.value = '';
+}
+
+function handleTutorUpload(input) {
+  const list = document.getElementById('upload-list');
+  Array.from(input.files).forEach(file => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(64,196,200,0.15);border-radius:8px;font-size:13px';
+    const icon = file.type.includes('pdf') ? '📄' : file.type.includes('video') ? '🎬' : '📁';
+    div.innerHTML = icon + ' <span style="flex:1;color:var(--off-white)">' + file.name + '</span><span style="color:var(--teal);font-weight:600">Uploaded ✓</span>';
+    list.appendChild(div);
+  });
+  showToast('✅ ' + input.files.length + ' file(s) uploaded successfully!', 'success');
+}
+
+function startLiveSession() {
+  if (!state.user || state.user.role !== 'tutor') {
+    showToast('Only tutors can start live sessions.', 'error');
+    return;
+  }
+  showToast('🔴 Live session started! Learners can now join.', 'success');
+}
+
+// Close modal on overlay click
+document.getElementById('course-detail-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeCourseModal();
+});
+
+
+</script>
 <style>
 /* ═══════════════════════════════════════════════
    DESIGN SYSTEM — RMI CHARCOAL + TEAL + WHITE
@@ -665,9 +876,6 @@ footer {
   /* Scroll to top mobile */
   #scroll-top-btn { bottom: 1.25rem; right: 1.25rem; width: 44px; height: 44px; }
   /* Social icons mobile */
-  .social-icons { gap: 12px; }
-  .social-btn { width: 50px; height: 50px; }
-  .social-btn-label { font-size: 7px; }
 }
 
 /* ─── SMALL MOBILE: up to 400px ──────────────── */
@@ -702,9 +910,39 @@ footer {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 20px;
   flex-wrap: wrap;
+  gap: 20px;
 }
+.social-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-decoration: none;
+  transition: var(--transition);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.social-btn:hover {
+  transform: translateY(-5px) scale(1.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+  border-color: rgba(255,255,255,0.28);
+}
+.social-btn svg { display: block; flex-shrink: 0; }
+.social-btn-label {
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  line-height: 1;
+}
+
+
 .social-btn {
   width: 56px;
   height: 56px;
@@ -811,8 +1049,121 @@ footer {
 @media(max-width:768px) {
   .location-inner { grid-template-columns: 1fr; gap: 2rem; }
   .location-map-wrap { height: 280px; }
-  .social-icons { gap: 10px; }
-  .social-btn { width: 38px; height: 38px; }
+}
+
+
+/* ─── COURSE MODAL ───────────────────────────── */
+.course-modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+  z-index:2000; align-items:center; justify-content:center; padding:1rem;
+}
+.course-modal-overlay.open { display:flex; }
+.course-modal {
+  background:var(--charcoal-m); border:1px solid rgba(64,196,200,0.2);
+  border-radius:var(--border-radius-lg); width:100%; max-width:820px;
+  max-height:90vh; overflow-y:auto; animation:fadeDown 0.25s ease;
+}
+.course-modal-header {
+  padding:1.5rem 1.75rem 1rem;
+  border-bottom:1px solid rgba(64,196,200,0.12);
+  display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;
+}
+.course-modal-title { font-size:1.2rem; font-weight:700; color:var(--off-white); }
+.course-modal-close {
+  background:none; border:none; color:var(--silver); cursor:pointer;
+  font-size:1.5rem; line-height:1; padding:2px 6px; border-radius:4px;
+  transition:var(--transition);
+}
+.course-modal-close:hover { color:var(--off-white); background:rgba(255,255,255,0.08); }
+.course-modal-tabs {
+  display:flex; gap:0; border-bottom:1px solid rgba(64,196,200,0.12);
+  padding:0 1.75rem; overflow-x:auto;
+}
+.course-tab {
+  padding:12px 20px; font-size:13px; font-weight:600; cursor:pointer;
+  color:var(--silver); border:none; background:none; font-family:var(--font-body);
+  border-bottom:2px solid transparent; transition:var(--transition); white-space:nowrap;
+}
+.course-tab.active { color:var(--teal); border-bottom-color:var(--teal); }
+.course-modal-body { padding:1.5rem 1.75rem; }
+.course-tab-panel { display:none; }
+.course-tab-panel.active { display:block; }
+
+/* PDF viewer */
+.pdf-list { display:flex; flex-direction:column; gap:10px; }
+.pdf-item {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(64,196,200,0.1);
+  border-radius:10px; cursor:pointer; transition:var(--transition);
+}
+.pdf-item:hover { background:rgba(64,196,200,0.08); border-color:rgba(64,196,200,0.3); }
+.pdf-icon { font-size:24px; flex-shrink:0; }
+.pdf-info { flex:1; min-width:0; }
+.pdf-name { font-size:13px; font-weight:600; color:var(--off-white); }
+.pdf-meta { font-size:11px; color:var(--silver); margin-top:2px; }
+.pdf-embed-wrap { margin-top:16px; border-radius:10px; overflow:hidden; border:1px solid rgba(64,196,200,0.2); }
+.pdf-embed-wrap iframe { width:100%; height:500px; border:none; display:block; background:#fff; }
+
+/* Tutor booking */
+.tutor-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-bottom:1.5rem; }
+.tutor-card {
+  background:rgba(255,255,255,0.04); border:1px solid rgba(64,196,200,0.1);
+  border-radius:12px; padding:1.25rem; text-align:center; transition:var(--transition);
+}
+.tutor-card:hover { border-color:rgba(64,196,200,0.3); background:rgba(64,196,200,0.06); }
+.tutor-avatar-lg {
+  width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; font-weight:700; color:var(--charcoal); margin:0 auto 10px;
+}
+.tutor-name-lg { font-size:14px; font-weight:700; color:var(--off-white); }
+.tutor-subject { font-size:11px; color:var(--teal); font-weight:600; margin:3px 0 8px; }
+.tutor-rating { font-size:12px; color:var(--silver); }
+.book-btn {
+  margin-top:10px; width:100%; padding:9px; font-size:13px; font-weight:600;
+  background:linear-gradient(135deg,var(--teal-d),var(--teal)); color:var(--charcoal);
+  border:none; border-radius:8px; cursor:pointer; transition:var(--transition);
+}
+.book-btn:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(64,196,200,0.35); }
+
+/* Live session */
+.live-session-area { display:flex; flex-direction:column; gap:14px; }
+.live-card {
+  display:flex; align-items:center; gap:14px; padding:14px 16px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(64,196,200,0.12);
+  border-radius:12px; transition:var(--transition);
+}
+.live-card:hover { border-color:rgba(64,196,200,0.3); }
+.live-badge { background:#ef4444; color:white; font-size:10px; font-weight:800;
+  padding:3px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px;
+  animation:pulse 1.5s infinite; }
+.live-info { flex:1; min-width:0; }
+.live-title { font-size:13px; font-weight:700; color:var(--off-white); }
+.live-meta { font-size:11px; color:var(--silver); margin-top:2px; }
+.join-live-btn {
+  padding:8px 18px; font-size:13px; font-weight:700;
+  background:linear-gradient(135deg,#ef4444,#dc2626); color:white;
+  border:none; border-radius:8px; cursor:pointer; transition:var(--transition); white-space:nowrap;
+}
+.join-live-btn:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(239,68,68,0.4); }
+
+/* Tutor portal upload area */
+.upload-zone {
+  border:2px dashed rgba(64,196,200,0.3); border-radius:12px; padding:2rem;
+  text-align:center; cursor:pointer; transition:var(--transition); margin-bottom:14px;
+}
+.upload-zone:hover { border-color:var(--teal); background:rgba(64,196,200,0.05); }
+.upload-zone-icon { font-size:2.5rem; margin-bottom:8px; }
+.upload-zone-text { font-size:13px; color:var(--silver); }
+.upload-zone-sub { font-size:11px; color:var(--silver-d); margin-top:4px; }
+
+@media(max-width:768px){
+  .course-modal { max-height:95vh; }
+  .course-modal-header { padding:1.25rem 1rem 0.875rem; }
+  .course-modal-tabs { padding:0 1rem; }
+  .course-modal-body { padding:1.25rem 1rem; }
+  .tutor-grid { grid-template-columns:1fr 1fr; }
+  .pdf-embed-wrap iframe { height:340px; }
 }
 
 </style>
@@ -1036,7 +1387,7 @@ footer {
       <div class="card">
         <div class="card-badge">Founded 2020</div>
         <div class="card-title">Who We Are</div>
-        <div class="card-desc">Royal Mercy Institute is a South African science and technology enterprise founded in 2020 by Mohau Mokoena (CEO & CTO). Our mission is to make quality STEM education accessible to young people aged 10–25 from disadvantaged and under-resourced communities across South Africa.<br/><br/>We are currently in the empathy phase, with our app (FlutterFlow) and website (Wix) actively in development. We compete in the MTN Digital Solutions Competition hosted by Enactus South Africa under SDG 4: Quality Education.</div>
+        <div class="card-desc">Royal Mercy Institute is a South African science and technology enterprise founded in 2020 by Mohau Mokoena (CEO & CTO). Our mission is to make quality STEM education accessible to young people aged 10–25 from disadvantaged and under-resourced communities across South Africa.<br/><br/>We are currently in the empathy phase, with our app (FlutterFlow) and website (Wix) actively in development. We compete in the MTN Digital Solutions Competition hosted by Enactus South Africa under SDG 4: Quality Education — we made it to the <strong style="color:var(--teal)">Top 40 finalists</strong>, competing against universities from across South Africa as <strong>Enactus NWU</strong> (North-West University).</div>
       </div>
       <div class="card">
         <div class="card-badge">The Problem</div>
@@ -1482,7 +1833,7 @@ footer {
       </div>
     </div>
     <div class="location-map-wrap">
-      <div id="rmi-leaflet-map" style="width:100%;height:100%;border-radius:var(--radius-lg)"></div>
+      <div id="rmi-map" style="width:100%;height:380px;border-radius:12px;"></div>
     </div>
   </div>
 </section>
@@ -1513,30 +1864,7 @@ footer {
       <span class="footer-link" style="font-size:11px;opacity:0.8">Mohau Mokoena · Founder, CEO &amp; CTO</span>
       <a class="footer-link" href="mailto:royalmercyinstitute@gmail.com">✉ royalmercyinstitute@gmail.com</a>
       <span class="footer-link">📍 Vanderbijlpark, South Africa</span>
-        <a href="YOUR_YOUTUBE_URL" target="_blank" class="social-btn" title="YouTube" style="background:#ff0000">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.8 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
-          <span class="social-btn-label">YouTube</span>
-        </a>
-        <a href="YOUR_X_TWITTER_URL" target="_blank" class="social-btn" title="X / Twitter" style="background:#000;border:1px solid #333">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          <span class="social-btn-label">X / Twitter</span>
-        </a>
-        <a href="YOUR_INSTAGRAM_URL" target="_blank" class="social-btn" title="Instagram" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-          <span class="social-btn-label">Instagram</span>
-        </a>
-        <a href="YOUR_TIKTOK_URL" target="_blank" class="social-btn" title="TikTok" style="background:#010101">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>
-          <span class="social-btn-label">TikTok</span>
-        </a>
-        <a href="YOUR_FACEBOOK_URL" target="_blank" class="social-btn" title="Facebook" style="background:#1877f2">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          <span class="social-btn-label">Facebook</span>
-        </a>
-        <a href="YOUR_LINKEDIN_URL" target="_blank" class="social-btn" title="LinkedIn" style="background:#0077b5">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          <span class="social-btn-label">LinkedIn</span>
-        </a>
+
       </div>
     </div>
   </div>
@@ -1665,6 +1993,8 @@ async function doSignup() {
   const name = document.getElementById('signup-name').value;
   const email = document.getElementById('signup-email').value;
   const password = document.getElementById('signup-password').value;
+  const roleEl = document.getElementById('signup-role');
+  const role = roleEl ? roleEl.value : 'learner';
   const alertEl = document.getElementById('signup-alert');
   alertEl.innerHTML = '';
   if (!name||!email||!password) { alertEl.innerHTML='<div class="alert alert-error">Please fill in all fields.</div>'; return; }
@@ -1733,9 +2063,12 @@ function renderCourses(courses, targetId='courses-grid') {
         <span>👥 ${c.enrolled} enrolled</span>
       </div>
       <div class="progress-bar" style="margin:12px 0"><div class="progress-fill" style="width:${Math.min(100,c.enrolled/2)}%"></div></div>
-      <button class="enrol-btn ${state.enrolledIds.includes(c.id)?'enrolled':''}" onclick="toggleEnroll('${c.id}',this)">
-        ${state.enrolledIds.includes(c.id)?'✓ Enrolled':'Enrol Now — Free'}
-      </button>
+      <div style="display:flex;gap:8px;margin-top:auto">
+        <button class="enrol-btn ${state.enrolledIds.includes(c.id)?'enrolled':''}" onclick="toggleEnroll('${c.id}',this)" style="flex:1">
+          ${state.enrolledIds.includes(c.id)?'✓ Enrolled':'Enrol — R100/mo'}
+        </button>
+        <button onclick="openCourseModal(${JSON.stringify(c).replace(/'/g,'&#39;')})" style="padding:0 14px;background:rgba(64,196,200,0.15);border:1px solid rgba(64,196,200,0.3);color:var(--teal);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:var(--transition)" title="View tutorials, book tutor, join live">📚</button>
+      </div>
       ${state.user?.role==='admin'?`<button class="btn-danger" onclick="deleteCourse('${c.id}')" style="margin-top:6px;width:100%;padding:8px">Delete Course</button>`:''}
     </div>`).join('');
 }
@@ -2064,95 +2397,8 @@ if (state.user) document.getElementById('dash-name').textContent = state.user.na
 </script>
 
 <!-- Leaflet.js interactive map -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLEo=" crossorigin=""></script>
-<script>
-(function initLeafletMap() {
-  var lat = -26.7322, lng = 27.8395;
 
-  // Wait for the map container to exist in the DOM
-  var container = document.getElementById('rmi-leaflet-map');
-  if (!container) return;
 
-  var map = L.map('rmi-leaflet-map', {
-    center: [lat, lng],
-    zoom: 14,
-    zoomControl: true,
-    scrollWheelZoom: false
-  });
-
-  // OpenStreetMap tiles — free, no API key needed
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19
-  }).addTo(map);
-
-  // SVG pin icon — no emoji, works on all browsers & mobile
-  var pinSvg = [
-    '<svg xmlns="http://www.w3.org/2000/svg" width="42" height="54" viewBox="0 0 42 54">',
-      '<defs>',
-        '<linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">',
-          '<stop offset="0%" style="stop-color:#0d9488"/>',
-          '<stop offset="100%" style="stop-color:#40c4c8"/>',
-        '</linearGradient>',
-      '</defs>',
-      // Drop shadow
-      '<ellipse cx="21" cy="52" rx="8" ry="3" fill="rgba(0,0,0,0.25)"/>',
-      // Pin body
-      '<path d="M21 2C12.16 2 5 9.16 5 18c0 12.5 16 32 16 32s16-19.5 16-32C37 9.16 29.84 2 21 2z" fill="url(#pinGrad)" stroke="white" stroke-width="2"/>',
-      // White inner circle
-      '<circle cx="21" cy="18" r="7" fill="white" opacity="0.95"/>',
-      // Teal dot in centre
-      '<circle cx="21" cy="18" r="4" fill="#0d9488"/>',
-    '</svg>'
-  ].join('');
-
-  var rmiIcon = L.divIcon({
-    html: '<div style="filter:drop-shadow(0 4px 8px rgba(0,0,0,0.35))">' + pinSvg + '</div>',
-    className: 'rmi-map-icon',
-    iconSize:   [42, 54],
-    iconAnchor: [21, 54],
-    popupAnchor:[0, -58]
-  });
-
-  // Marker + popup
-  L.marker([lat, lng], { icon: rmiIcon })
-    .addTo(map)
-    .bindPopup(
-      '<div style="font-family:Arial,sans-serif;min-width:210px;padding:4px 2px">' +
-        '<div style="font-weight:800;font-size:14px;color:#0d9488;margin-bottom:8px;border-bottom:1px solid #e5e7eb;padding-bottom:6px">' +
-          'Royal Mercy Institute' +
-        '</div>' +
-        '<div style="font-size:12px;color:#374151;line-height:2">' +
-          '<span style="color:#0d9488;font-weight:600">Address:</span> Vanderbijlpark, Gauteng<br/>' +
-          '<span style="color:#0d9488;font-weight:600">Phone:</span> 061 917 7807<br/>' +
-          '<span style="color:#0d9488;font-weight:600">Email:</span> royalmercyinstitute@gmail.com<br/>' +
-          '<span style="color:#0d9488;font-weight:600">Hours:</span> Mon-Fri 08:00-17:00' +
-        '</div>' +
-        '<a href="https://www.google.com/maps/dir/?api=1&destination=-26.7322,27.8395" target="_blank" ' +
-           'style="display:block;margin-top:10px;padding:8px 0;background:#0d9488;color:white;border-radius:6px;' +
-                  'text-decoration:none;font-size:12px;font-weight:700;text-align:center">' +
-          'Get Directions in Google Maps' +
-        '</a>' +
-      '</div>',
-      { maxWidth: 270 }
-    )
-    .openPopup();
-
-  // Teal radius circle
-  L.circle([lat, lng], {
-    radius: 600,
-    color: '#40c4c8',
-    fillColor: '#40c4c8',
-    fillOpacity: 0.07,
-    weight: 1.5,
-    dashArray: '5 5'
-  }).addTo(map);
-
-  // Fix map rendering if container was hidden on load
-  setTimeout(function() { map.invalidateSize(); }, 300);
-
-})();
-</script>
 
 <!-- Scroll to Top Button -->
 <button id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Scroll to top">
@@ -2160,5 +2406,166 @@ if (state.user) document.getElementById('dash-name').textContent = state.user.na
     <polyline points="18 15 12 9 6 15"></polyline>
   </svg>
 </button>
+
+<!-- ═══ COURSE DETAIL MODAL ═══ -->
+<div class="course-modal-overlay" id="course-detail-modal">
+  <div class="course-modal">
+    <div class="course-modal-header">
+      <div>
+        <div style="font-size:11px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px" id="cmod-category"></div>
+        <div class="course-modal-title" id="cmod-title">Course Title</div>
+        <div style="font-size:12px;color:var(--silver);margin-top:4px" id="cmod-meta"></div>
+      </div>
+      <button class="course-modal-close" onclick="closeCourseModal()">✕</button>
+    </div>
+    <div class="course-modal-tabs">
+      <button class="course-tab active" onclick="switchCourseTab('tutorials',this)">📄 Tutorials & PDFs</button>
+      <button class="course-tab" onclick="switchCourseTab('tutors',this)">👨‍🏫 Book a Tutor</button>
+      <button class="course-tab" onclick="switchCourseTab('live',this)">🔴 Live Sessions</button>
+      <button class="course-tab" onclick="switchCourseTab('upload',this)" id="tutor-upload-tab" style="display:none">⬆️ Tutor Upload</button>
+    </div>
+    <div class="course-modal-body">
+
+      <!-- TAB: Tutorials & PDFs -->
+      <div class="course-tab-panel active" id="ctab-tutorials">
+        <p style="font-size:13px;color:var(--silver);margin-bottom:1rem" id="cmod-desc"></p>
+        <div class="section-tag" style="margin-bottom:12px">Course Materials</div>
+        <div class="pdf-list" id="cmod-pdf-list"></div>
+        <div class="pdf-embed-wrap" id="pdf-viewer-wrap" style="display:none">
+          <iframe id="pdf-viewer-frame" src="" title="PDF Viewer"></iframe>
+        </div>
+      </div>
+
+      <!-- TAB: Book a Tutor -->
+      <div class="course-tab-panel" id="ctab-tutors">
+        <div style="font-size:13px;color:var(--silver);margin-bottom:1.25rem">
+          Choose a qualified tutor for one-on-one or group sessions. Tutors are vetted by RMI.
+          Pricing: <strong style="color:var(--teal)">Included in your R100/month subscription.</strong>
+        </div>
+        <div class="tutor-grid" id="cmod-tutor-grid"></div>
+        <div style="background:rgba(64,196,200,0.06);border:1px solid rgba(64,196,200,0.2);border-radius:10px;padding:1rem;font-size:12px;color:var(--silver)">
+          📅 After booking, the tutor will contact you within 24 hours to schedule your session via WhatsApp or our live session platform.
+        </div>
+      </div>
+
+      <!-- TAB: Live Sessions -->
+      <div class="course-tab-panel" id="ctab-live">
+        <div style="font-size:13px;color:var(--silver);margin-bottom:1.25rem">
+          Join live tutoring sessions streamed by your tutors. Ask questions in real time via the chat below the stream.
+        </div>
+        <div class="live-session-area" id="cmod-live-sessions"></div>
+        <div style="margin-top:1.5rem;padding:1rem;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(64,196,200,0.1)">
+          <div style="font-size:12px;font-weight:700;color:var(--off-white);margin-bottom:8px">💬 Session Q&A Chat</div>
+          <div id="live-chat-box" style="height:140px;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;margin-bottom:8px;font-size:12px;color:var(--silver)">
+            No live session active. Join a session above to chat.
+          </div>
+          <div style="display:flex;gap:8px">
+            <input id="live-chat-input" class="form-input" placeholder="Ask a question..." style="flex:1;font-size:13px;padding:8px 12px" disabled/>
+            <button class="btn-primary" style="padding:8px 14px;font-size:13px" onclick="sendLiveQuestion()">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Tutor Upload (tutors only) -->
+      <div class="course-tab-panel" id="ctab-upload">
+        <div style="font-size:13px;color:var(--silver);margin-bottom:1.25rem">
+          Upload course materials for your learners. Supported formats: PDF, MP4, MOV, DOCX, PPT.
+        </div>
+        <div class="upload-zone" onclick="document.getElementById('tutor-file-input').click()">
+          <div class="upload-zone-icon">📁</div>
+          <div class="upload-zone-text">Click to upload or drag & drop files here</div>
+          <div class="upload-zone-sub">PDF tutorials · Video lectures · Slide decks · Max 500MB per file</div>
+          <input type="file" id="tutor-file-input" style="display:none" multiple accept=".pdf,.mp4,.mov,.docx,.pptx" onchange="handleTutorUpload(this)"/>
+        </div>
+        <div id="upload-list" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div style="margin-top:1.5rem">
+          <div style="font-size:13px;font-weight:700;color:var(--off-white);margin-bottom:10px">🔴 Start Live Recording Session</div>
+          <div style="font-size:12px;color:var(--silver);margin-bottom:12px">
+            Start a live video session that learners can join in real time and ask questions.
+          </div>
+          <button class="btn-primary" onclick="startLiveSession()" style="width:100%;padding:12px;font-size:14px;font-weight:700">
+            🔴 Go Live Now
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- Leaflet Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+(function() {
+  function initMap() {
+    var el = document.getElementById('rmi-map');
+    if (!el || el._leaflet_id) return;
+    var lat = -26.7322, lng = 27.8395;
+    var map = L.map('rmi-map', { center:[lat,lng], zoom:15, scrollWheelZoom:false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom:19
+    }).addTo(map);
+
+    // SVG pin — no emoji, cross-browser safe
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 36 48">'
+      + '<path d="M18 2C10.3 2 4 8.3 4 16c0 10.9 14 30 14 30s14-19.1 14-30C32 8.3 25.7 2 18 2z"'
+      + ' fill="#0d9488" stroke="white" stroke-width="2"/>'
+      + '<circle cx="18" cy="16" r="6" fill="white"/>'
+      + '<circle cx="18" cy="16" r="3.5" fill="#0d9488"/>'
+      + '</svg>';
+
+    var icon = L.divIcon({
+      html: svg,
+      className: '',
+      iconSize:[36,48],
+      iconAnchor:[18,48],
+      popupAnchor:[0,-52]
+    });
+
+    L.marker([lat,lng], {icon:icon}).addTo(map).bindPopup(
+      '<div style="font-family:Arial,sans-serif;padding:4px;min-width:200px">'
+      + '<div style="font-weight:800;font-size:14px;color:#0d9488;border-bottom:1px solid #e5e7eb;padding-bottom:6px;margin-bottom:8px">Royal Mercy Institute</div>'
+      + '<div style="font-size:12px;line-height:2;color:#374151">'
+      + '<b style="color:#0d9488">Address:</b> Vanderbijlpark, Gauteng, SA<br>'
+      + '<b style="color:#0d9488">Phone:</b> 061 917 7807<br>'
+      + '<b style="color:#0d9488">Email:</b> royalmercyinstitute@gmail.com<br>'
+      + '<b style="color:#0d9488">Hours:</b> Mon–Fri 08:00–17:00'
+      + '</div>'
+      + '<a href="https://www.google.com/maps/dir/?api=1&destination=-26.7322,27.8395"'
+      + ' target="_blank" style="display:block;margin-top:10px;padding:8px;background:#0d9488;'
+      + 'color:white;border-radius:6px;text-decoration:none;font-size:12px;font-weight:700;text-align:center">'
+      + 'Get Directions &rarr;</a>'
+      + '</div>',
+      {maxWidth:260}
+    ).openPopup();
+
+    L.circle([lat,lng],{radius:400,color:'#0d9488',fillColor:'#40c4c8',fillOpacity:0.08,weight:1.5}).addTo(map);
+    setTimeout(function(){ map.invalidateSize(); }, 200);
+  }
+
+  // Run on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(initMap,100); });
+  } else {
+    setTimeout(initMap, 100);
+  }
+
+  // Also run whenever user navigates to About page
+  var _origNav = window.navigate;
+  document.addEventListener('DOMContentLoaded', function() {
+    var __nav = window.navigate;
+    if (typeof __nav === 'function') {
+      window.navigate = function(page) {
+        __nav(page);
+        if (page === 'about') setTimeout(initMap, 200);
+      };
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
