@@ -91,7 +91,7 @@ function adminOnly(req, res, next) {
 // POST /api/auth/signup
 app.post('/api/auth/signup', async (req, res) => {
   try {
-    const { name, email, password, role = 'learner' } = req.body;
+    const { name, email, password, role = 'learner', phone = '', qualification = '' } = req.body;
     const validRoles = ['learner','tutor','admin'];
     const assignedRole = validRoles.includes(role) ? role : 'learner';
     if (!name || !email || !password)
@@ -99,10 +99,15 @@ app.post('/api/auth/signup', async (req, res) => {
     if (users.find(u => u.email === email))
       return res.status(409).json({ error: 'Email already registered.' });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = { id: String(nextId.users++), name, email, password: hashedPassword, role: assignedRole, createdAt: new Date().toISOString() };
+    const year = new Date().getFullYear();
+    const idNum = String(nextId.users).padStart(4,'0');
+    const prefix = assignedRole === 'tutor' ? 'RMI-TUT' : assignedRole === 'admin' ? 'RMI-ADM' : 'RMI-STU';
+    const rmiId  = `${prefix}-${year}-${idNum}`;
+    const approved = assignedRole === 'learner' || assignedRole === 'admin' ? true : false;
+    const user = { id: String(nextId.users++), name, email, password: hashedPassword, role: assignedRole, rmiId, phone: phone||'', qualification: qualification||'', approved, createdAt: new Date().toISOString() };
     users.push(user);
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name }, JWT_SECRET, { expiresIn: '24h' });
-    res.status(201).json({ message: 'Account created successfully!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    res.status(201).json({ message: 'Account created successfully!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role, rmiId: user.rmiId, approved: user.approved } });
   } catch (err) {
     res.status(500).json({ error: 'Server error during signup.' });
   }
@@ -117,7 +122,7 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ error: 'Invalid email or password.' });
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name }, JWT_SECRET, { expiresIn: '24h' });
-    res.json({ message: 'Login successful!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    res.json({ message: 'Login successful!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role, rmiId: user.rmiId, approved: user.approved } });
   } catch {
     res.status(500).json({ error: 'Server error during login.' });
   }
@@ -188,7 +193,46 @@ app.delete('/api/users/:id', authMiddleware, adminOnly, (req, res) => {
   res.json({ message: 'User deleted.' });
 });
 
-// ── Stats endpoint ─────────────────────────────────────────────
+
+// ── Payment Recording ──────────────────────────────
+let payments = [];
+
+app.post('/api/payments', authMiddleware, (req, res) => {
+  const { plan, amount, method, courseIds } = req.body;
+  const payment = {
+    id: Date.now().toString(),
+    userId:  req.user.id,
+    rmiId:   users.find(u => u.id === req.user.id)?.rmiId || '',
+    plan, amount, method,
+    courseIds: courseIds || [],
+    status: 'completed',
+    createdAt: new Date().toISOString()
+  };
+  payments.push(payment);
+  // Mark user as having active subscription
+  const user = users.find(u => u.id === req.user.id);
+  if (user) { user.subscription = { plan, amount, activeSince: payment.createdAt }; }
+  res.status(201).json({ message: 'Payment recorded.', payment });
+});
+
+app.get('/api/payments', authMiddleware, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.json(payments.filter(p => p.userId === req.user.id));
+  }
+  res.json(payments); // Admin sees all
+});
+
+// ── Educator approval (admin only) ─────────────────
+app.put('/api/users/:id/approve', authMiddleware, (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only.' });
+  const user = users.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: 'User not found.' });
+  user.approved = true;
+  res.json({ message: 'Educator approved.', user: { id: user.id, name: user.name, rmiId: user.rmiId, role: user.role, approved: user.approved } });
+});
+
+// ── Stats (updated) ────────────────────────────────
+
 app.get('/api/stats', (req, res) => {
   res.json({
     totalCourses: courses.length,
