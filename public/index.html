@@ -1439,15 +1439,35 @@ footer {
       <h2 class="section-title">Our <span style="color:var(--teal)">Courses</span></h2>
       <p class="section-sub">Curriculum-aligned STEM tutorials for South African learners. Affordable, always.</p>
     </div>
-    <div class="filter-bar">
-      <input class="search-box" type="text" placeholder="🔍  Search courses..." id="course-search" oninput="filterCourses()"/>
-      <button class="filter-btn active" onclick="setCategoryFilter('all',this)">All</button>
-      <button class="filter-btn" onclick="setCategoryFilter('Programming',this)">Programming</button>
-      <button class="filter-btn" onclick="setCategoryFilter('Web Dev',this)">Web Dev</button>
-      <button class="filter-btn" onclick="setCategoryFilter('RPAS Tutorials',this)">RPAS Tutorials</button>
-      <button class="filter-btn" onclick="setCategoryFilter('Data Science',this)">Data Science</button>
-      <button class="filter-btn" onclick="setCategoryFilter('Mobile',this)">Mobile</button>
-      <button class="filter-btn" onclick="setCategoryFilter('AI/ML',this)">AI/ML</button>
+    <!-- Phase Filter -->
+    <div style="margin-bottom:1rem">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--silver);margin-bottom:8px">Phase</div>
+      <div class="filter-bar" id="phase-filter-bar">
+        <button class="filter-btn active" onclick="setPhaseFilter('all',this)">🎓 All Phases</button>
+        <button class="filter-btn" onclick="setPhaseFilter('Primary School',this)">🏫 Primary School</button>
+        <button class="filter-btn" onclick="setPhaseFilter('High School',this)">📚 High School</button>
+        <button class="filter-btn" onclick="setPhaseFilter('University',this)">🎓 University / College</button>
+      </div>
+    </div>
+    <!-- Category + Search Filter -->
+    <div style="margin-bottom:2rem">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--silver);margin-bottom:8px">Subject Category</div>
+      <div class="filter-bar" id="category-filter-bar">
+        <input class="search-box" type="text" placeholder="🔍  Search courses..." id="course-search" oninput="filterCourses()"/>
+        <button class="filter-btn active" onclick="setCategoryFilter('all',this)">All Subjects</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Mathematics',this)">📐 Mathematics</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Physical Sciences',this)">⚗️ Physical Sciences</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Life Sciences',this)">🌿 Life Sciences</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Computer Science',this)">💻 Computer Science</button>
+        <button class="filter-btn" onclick="setCategoryFilter('CAT',this)">🖥️ CAT</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Geography',this)">🌍 Geography</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Robotics',this)">🤖 Robotics</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Programming',this)">🐍 Programming</button>
+        <button class="filter-btn" onclick="setCategoryFilter('AI/ML',this)">🧠 AI / ML</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Data Science',this)">📊 Data Science</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Cybersecurity',this)">🔐 Cybersecurity</button>
+        <button class="filter-btn" onclick="setCategoryFilter('Primary',this)">🏫 Primary Subjects</button>
+      </div>
     </div>
     <div class="grid-3" id="courses-grid">
       <div class="loading-state"><div class="spinner"></div><p>Fetching courses from API...</p></div>
@@ -2132,6 +2152,7 @@ let state = {
   enrolledIds: JSON.parse(localStorage.getItem('rmi_enrolled') || '[]'),
   currentPage: 'home',
   categoryFilter: 'all',
+  phaseFilter: 'all',
   socket: null,
   chatName: null,
   chatRoom: 'general',
@@ -2171,13 +2192,37 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function closeModalOutside(e,id) { if(e.target.id===id) closeModal(id); }
 
 // ─── API Fetch Helper ─────────────────────────────
-async function apiFetch(path, options={}) {
-  const headers = { 'Content-Type':'application/json', ...(options.headers||{}) };
-  if (state.token) headers['Authorization'] = `Bearer ${state.token}`;
-  const res = await fetch(API+path, { ...options, headers });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Request failed');
-  return data;
+async function apiFetch(path, method, body) {
+  // Supports both old (path, options) and new (path, method, body) calling styles
+  var opts = {};
+  if (typeof method === 'object' && method !== null) {
+    // Old style: apiFetch(path, {method, body, headers})
+    opts = method;
+  } else if (typeof method === 'string') {
+    // New style: apiFetch(path, 'POST', {key:val})
+    opts = { method: method, body: body ? JSON.stringify(body) : undefined };
+  }
+  var headers = { 'Content-Type': 'application/json' };
+  if (opts.headers) Object.assign(headers, opts.headers);
+  if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+  var fetchOpts = Object.assign({}, opts, { headers: headers });
+  if (fetchOpts.body && typeof fetchOpts.body !== 'string') {
+    fetchOpts.body = JSON.stringify(fetchOpts.body);
+  }
+  try {
+    var res = await fetch((API || '') + path, fetchOpts);
+    var text = await res.text();
+    var data;
+    try { data = JSON.parse(text); }
+    catch(e) { throw new Error('Server returned invalid response. Please try again.'); }
+    if (!res.ok) throw new Error((data && data.error) || 'Request failed');
+    return data;
+  } catch(e) {
+    if (e.message.includes('invalid response') || e.message.includes('fetch')) {
+      throw new Error('Connection error. Please check your internet and try again.');
+    }
+    throw e;
+  }
 }
 
 // ─── Auth ─────────────────────────────────────────
@@ -2201,28 +2246,7 @@ async function doLogin() {
   }
 }
 
-async function doSignup() {
-  const name = document.getElementById('signup-name').value;
-  const email = document.getElementById('signup-email').value;
-  const password = document.getElementById('signup-password').value;
-  const roleEl = document.getElementById('signup-role');
-  const role = roleEl ? roleEl.value : 'learner';
-  const alertEl = document.getElementById('signup-alert');
-  alertEl.innerHTML = '';
-  if (!name||!email||!password) { alertEl.innerHTML='<div class="alert alert-error">Please fill in all fields.</div>'; return; }
-  if (password.length<6) { alertEl.innerHTML='<div class="alert alert-error">Password must be at least 6 characters.</div>'; return; }
-  try {
-    const data = await apiFetch('/api/auth/signup', { method:'POST', body:JSON.stringify({name,email,password}) });
-    state.token = data.token; state.user = data.user;
-    localStorage.setItem('rmi_token', data.token);
-    localStorage.setItem('rmi_user', JSON.stringify(data.user));
-    updateNavAuth();
-    closeModal('signup-modal');
-    toast(`Account created! Welcome, ${data.user.name}! 🚀`, 'success');
-  } catch(err) {
-    alertEl.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
-  }
-}
+
 
 function doLogout() {
   state.token = null; state.user = null;
@@ -2266,7 +2290,10 @@ function renderCourses(courses, targetId='courses-grid') {
   if (!courses.length) { grid.innerHTML='<div class="loading-state">No courses found.</div>'; return; }
   grid.innerHTML = courses.map(c => `
     <div class="card" style="display:flex;flex-direction:column">
-      <div class="card-badge ${c.level.toLowerCase()}">${c.level}</div>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+        <div class="card-badge ${c.level.toLowerCase()}">${c.level}</div>
+        ${c.phase ? `<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:3px 8px;border-radius:4px;background:rgba(64,196,200,0.1);color:var(--teal);border:1px solid rgba(64,196,200,0.2)">${c.phase}</span>` : ''}
+      </div>
       <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">${c.category}</div>
       <div class="card-title">${c.title}</div>
       <div class="card-desc">${c.description}</div>
@@ -2303,17 +2330,30 @@ function toggleEnroll(id, btn) {
 }
 
 function filterCourses() {
-  const q = document.getElementById('course-search').value.toLowerCase();
-  let filtered = state.courses;
-  if (state.categoryFilter !== 'all') filtered = filtered.filter(c=>c.category===state.categoryFilter);
-  if (q) filtered = filtered.filter(c=>c.title.toLowerCase().includes(q)||c.description.toLowerCase().includes(q));
+  var q = (document.getElementById('course-search') || {}).value || '';
+  q = q.toLowerCase();
+  var filtered = state.courses || [];
+  var cat   = state.categoryFilter || 'all';
+  var phase = state.phaseFilter    || 'all';
+  if (cat   !== 'all') filtered = filtered.filter(function(c){ return c.category === cat; });
+  if (phase !== 'all') filtered = filtered.filter(function(c){ return c.phase === phase; });
+  if (q) filtered = filtered.filter(function(c){
+    return c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q);
+  });
   renderCourses(filtered);
 }
 
 function setCategoryFilter(cat, btn) {
   state.categoryFilter = cat;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('#category-filter-bar .filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  filterCourses();
+}
+
+function setPhaseFilter(phase, btn) {
+  state.phaseFilter = phase;
+  document.querySelectorAll('#phase-filter-bar .filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
   filterCourses();
 }
 
@@ -3011,6 +3051,17 @@ function updateTutorIdDisplay() {
 
 </script>
 
+<script>
+function handlePOPUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  document.getElementById('pop-file-name').textContent = file.name;
+  document.getElementById('pop-upload-confirm').style.display = 'block';
+  document.getElementById('pop-upload-zone').style.borderColor = 'var(--teal)';
+  showToast('✅ Proof of payment attached: ' + file.name, 'success');
+}
+</script>
+
 <!-- Leaflet Map -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -3021,10 +3072,21 @@ function updateTutorIdDisplay() {
     if (!el || el._leaflet_id) return;
     var lat = -26.7322, lng = 27.8395;
     var map = L.map('rmi-map', { center:[lat,lng], zoom:15, scrollWheelZoom:false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom:19
-    }).addTo(map);
+    // Satellite tiles (ESRI World Imagery — free, no API key)
+    var satellite = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { attribution:'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics', maxZoom:19 }
+    );
+    // Street map fallback
+    var streets = L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom:19 }
+    );
+    // Start with satellite
+    satellite.addTo(map);
+
+    // Layer toggle control
+    L.control.layers({'🛰️ Satellite': satellite, '🗺️ Street Map': streets}).addTo(map);
 
     // SVG pin — no emoji, cross-browser safe
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 36 48">'
@@ -3187,6 +3249,18 @@ function updateTutorIdDisplay() {
         <div style="background:rgba(64,196,200,0.06);border:1px solid rgba(64,196,200,0.15);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--silver);margin-bottom:1rem;line-height:1.7">
           ✅ After payment, email your proof of payment to <strong style="color:var(--teal)">royalmercyinstitute@gmail.com</strong> with your ID as the subject. Your account will be activated within 24 hours.
         </div>
+        <div style="margin-bottom:1rem">
+          <label style="font-size:12px;font-weight:600;color:var(--silver);display:block;margin-bottom:6px">📎 Upload Proof of Payment (optional)</label>
+          <div style="border:2px dashed rgba(64,196,200,0.3);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:var(--transition)" onclick="document.getElementById('pop-file-input').click()" id="pop-upload-zone">
+            <div style="font-size:1.5rem;margin-bottom:4px">📄</div>
+            <div style="font-size:12px;color:var(--silver)">Click to upload bank slip / screenshot</div>
+            <div style="font-size:11px;color:var(--silver-d);margin-top:2px">JPG, PNG, PDF accepted</div>
+            <input type="file" id="pop-file-input" style="display:none" accept=".jpg,.jpeg,.png,.pdf" onchange="handlePOPUpload(this)"/>
+          </div>
+          <div id="pop-upload-confirm" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(64,196,200,0.1);border:1px solid rgba(64,196,200,0.3);border-radius:8px;font-size:12px;color:var(--teal)">
+            ✅ <span id="pop-file-name"></span> uploaded — ready to submit.
+          </div>
+        </div>
       </div>
 
       <!-- SnapScan section -->
@@ -3202,7 +3276,7 @@ function updateTutorIdDisplay() {
       </div>
 
       <!-- Pay button -->
-      <button id="pay-submit-btn" onclick="submitPayment()" style="width:100%;padding:14px;background:linear-gradient(135deg,#0d9488,#40c4c8);border:none;border-radius:12px;color:#0f1117;font-size:15px;font-weight:800;font-family:var(--font-body);cursor:pointer;transition:var(--transition);letter-spacing:0.3px">
+      <button id="pay-id="pay-submit-btn" onclick="submitPayment()" style="width:100%;padding:14px;background:linear-gradient(135deg,#0d9488,#40c4c8);border:none;border-radius:12px;color:#0f1117;font-size:15px;font-weight:800;font-family:var(--font-body);cursor:pointer;transition:var(--transition);letter-spacing:0.3px">
         🔒 Pay Securely — R150.00
       </button>
 
