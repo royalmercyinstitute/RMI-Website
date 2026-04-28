@@ -113,12 +113,13 @@ function openCourseModal(course) {
 
   // Reset to first tab
   switchCourseTab('tutorials', document.querySelector('.course-tab'));
-  document.getElementById('course-detail-modal').classList.add('open');
+  var cdm=document.getElementById('course-detail-modal'); if(cdm){cdm.style.display='flex';cdm.classList.add('open');}
   document.body.style.overflow = 'hidden';
 }
 
 function closeCourseModal() {
-  document.getElementById('course-detail-modal').classList.remove('open');
+  var cdm = document.getElementById('course-detail-modal');
+  if (cdm) { cdm.classList.remove('open'); cdm.style.display = 'none'; }
   document.body.style.overflow = '';
 }
 
@@ -144,15 +145,7 @@ function viewPDF(name, idx) {
   showToast('Opening: ' + decodeURIComponent(name), 'success');
 }
 
-function bookTutor(tutorName, courseTitle) {
-  if (!state.user) {
-    closeCourseModal();
-    openModal('login-modal');
-    showToast('Please log in to book a tutor.', 'error');
-    return;
-  }
-  showToast('✅ Booking request sent to ' + tutorName + '! They will contact you within 24 hrs via WhatsApp.', 'success');
-}
+
 
 function joinLiveSession(btn) {
   if (!state.user) {
@@ -1310,6 +1303,326 @@ footer {
   .pay-method-btn { min-width:100px; }
 }
 
+
+/* ─── VIDEO CALL MODAL ───────────────────────── */
+.vcall-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.92); z-index:4000;
+  flex-direction:column; align-items:center; justify-content:center;
+}
+.vcall-overlay.open { display:flex; }
+.vcall-container {
+  width:100%; max-width:900px; height:90vh;
+  background:#0a0c10; border-radius:16px;
+  border:1px solid rgba(64,196,200,0.25);
+  display:flex; flex-direction:column; overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.8);
+}
+.vcall-header {
+  padding:14px 20px;
+  background:linear-gradient(135deg,#0d2a28,#0f1117);
+  border-bottom:1px solid rgba(64,196,200,0.15);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.vcall-title { font-size:14px; font-weight:700; color:var(--off-white); }
+.vcall-subtitle { font-size:11px; color:var(--silver); margin-top:2px; }
+.vcall-status {
+  font-size:11px; font-weight:700; padding:4px 10px;
+  border-radius:20px; text-transform:uppercase; letter-spacing:0.5px;
+}
+.vcall-status.connecting { background:rgba(234,179,8,0.15); color:#eab308; }
+.vcall-status.live       { background:rgba(239,68,68,0.15);  color:#ef4444; animation:pulse 1.5s infinite; }
+.vcall-status.ended      { background:rgba(100,116,139,0.15);color:var(--silver); }
+.vcall-videos {
+  flex:1; display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px; padding:16px; background:#070910;
+}
+.vcall-video-wrap {
+  position:relative; background:#111318;
+  border-radius:12px; overflow:hidden;
+  border:1px solid rgba(64,196,200,0.1);
+  min-height:200px; display:flex; align-items:center; justify-content:center;
+}
+.vcall-video-wrap video {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.vcall-video-label {
+  position:absolute; bottom:10px; left:12px;
+  background:rgba(0,0,0,0.65); backdrop-filter:blur(6px);
+  border-radius:6px; padding:3px 10px;
+  font-size:11px; font-weight:700; color:white;
+}
+.vcall-video-placeholder {
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.vcall-avatar-big {
+  width:72px; height:72px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; font-weight:800; color:var(--charcoal);
+}
+.vcall-name { font-size:13px; color:var(--silver); }
+.vcall-controls {
+  padding:14px 20px; background:#0a0c10;
+  border-top:1px solid rgba(64,196,200,0.1);
+  display:flex; align-items:center; justify-content:center; gap:14px;
+}
+.vcall-btn {
+  width:52px; height:52px; border-radius:50%; border:none;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:20px; transition:var(--transition);
+}
+.vcall-btn:hover { transform:scale(1.1); }
+.vcall-btn.mic   { background:rgba(255,255,255,0.08); }
+.vcall-btn.cam   { background:rgba(255,255,255,0.08); }
+.vcall-btn.hang  { background:#ef4444; }
+.vcall-btn.muted { background:rgba(239,68,68,0.2); }
+.vcall-chat-strip {
+  width:100%; max-width:900px; margin-top:10px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(64,196,200,0.12);
+  border-radius:12px; padding:12px 16px;
+  display:flex; gap:8px; align-items:center;
+}
+.vcall-chat-strip input {
+  flex:1; background:none; border:none; outline:none;
+  color:var(--off-white); font-size:13px; font-family:var(--font-body);
+}
+.vcall-chat-strip button {
+  padding:6px 16px; font-size:13px; font-weight:600;
+  background:var(--teal); border:none; border-radius:8px;
+  color:var(--charcoal); cursor:pointer; font-family:var(--font-body);
+}
+
+/* ─── BOOKING MODAL ───────────────────────────── */
+.booking-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.78); z-index:3500;
+  align-items:center; justify-content:center; padding:1rem;
+}
+.booking-overlay.open { display:flex; }
+.booking-modal {
+  background:#0f1117; border:1px solid rgba(64,196,200,0.2);
+  border-radius:16px; width:100%; max-width:520px;
+  animation:scaleIn 0.22s ease; overflow:hidden;
+}
+.booking-header {
+  background:linear-gradient(135deg,#0d2a28,#0f2d2b);
+  padding:1.25rem 1.5rem;
+  border-bottom:1px solid rgba(64,196,200,0.12);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.booking-body { padding:1.5rem; }
+.booking-tutor-card {
+  display:flex; align-items:center; gap:14px;
+  padding:14px; background:rgba(64,196,200,0.06);
+  border:1px solid rgba(64,196,200,0.15);
+  border-radius:12px; margin-bottom:1.25rem;
+}
+.booking-slots {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px; margin-bottom:1.25rem;
+}
+.slot-btn {
+  padding:10px; border-radius:8px; font-size:12px; font-weight:600;
+  border:1px solid rgba(64,196,200,0.2); background:rgba(255,255,255,0.03);
+  color:var(--silver); cursor:pointer; transition:var(--transition);
+  font-family:var(--font-body);
+}
+.slot-btn:hover,.slot-btn.selected {
+  border-color:var(--teal); background:rgba(64,196,200,0.1); color:var(--teal);
+}
+
+/* ─── CHAT ROOMS ──────────────────────────────── */
+.chat-room-group { margin-bottom:8px; }
+.chat-room-group-title {
+  font-size:9px; font-weight:800; text-transform:uppercase;
+  letter-spacing:1px; color:var(--silver-d); padding:6px 12px 2px;
+}
+
+@media(max-width:768px){
+  .vcall-videos { grid-template-columns:1fr; }
+  .vcall-container { height:95vh; border-radius:10px; }
+  .booking-slots { grid-template-columns:1fr; }
+}
+
+
+/* ─── VIDEO CALL OVERLAY ─────────────────────── */
+#video-call-overlay {
+  display:none; position:fixed; inset:0;
+  background:#0a0c12; z-index:4000;
+  flex-direction:column; align-items:center; justify-content:center;
+}
+#video-call-overlay.open { display:flex; }
+
+.video-call-header {
+  position:absolute; top:0; left:0; right:0;
+  padding:1rem 1.5rem;
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);
+  z-index:10;
+}
+.video-call-title { font-size:15px; font-weight:700; color:white; }
+.video-call-sub { font-size:12px; color:rgba(255,255,255,0.6); margin-top:2px; }
+.video-timer { font-family:var(--font-mono); font-size:14px; color:var(--teal); font-weight:700; }
+
+.video-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  width:100%; max-width:1100px;
+  padding:80px 24px 120px;
+  box-sizing:border-box;
+}
+.video-tile {
+  position:relative; background:#1a1f2e;
+  border-radius:16px; overflow:hidden;
+  border:2px solid rgba(64,196,200,0.15);
+  aspect-ratio:16/9;
+}
+.video-tile video {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.video-tile-label {
+  position:absolute; bottom:10px; left:12px;
+  background:rgba(0,0,0,0.65); backdrop-filter:blur(4px);
+  color:white; font-size:12px; font-weight:600;
+  padding:4px 10px; border-radius:6px;
+}
+.video-tile-muted {
+  position:absolute; top:10px; right:10px;
+  background:rgba(239,68,68,0.85); color:white;
+  font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px;
+}
+.video-avatar-placeholder {
+  width:100%; height:100%; display:flex;
+  flex-direction:column; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#1a1f2e,#0f1117);
+}
+.video-avatar-circle {
+  width:80px; height:80px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; font-weight:700; color:var(--charcoal);
+  margin-bottom:12px;
+}
+.video-avatar-name { font-size:14px; color:rgba(255,255,255,0.8); font-weight:600; }
+
+.video-controls {
+  position:absolute; bottom:0; left:0; right:0;
+  padding:1.5rem; display:flex; align-items:center;
+  justify-content:center; gap:14px;
+  background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);
+}
+.vc-btn {
+  width:52px; height:52px; border-radius:50%; border:none;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all 0.2s; font-size:1.2rem;
+}
+.vc-btn:hover { transform:scale(1.1); }
+.vc-btn.red { background:#ef4444; }
+.vc-btn.red:hover { background:#dc2626; }
+.vc-btn.dark { background:rgba(255,255,255,0.12); }
+.vc-btn.dark:hover { background:rgba(255,255,255,0.22); }
+.vc-btn.active { background:var(--teal); }
+
+/* Live session chat panel */
+.video-chat-panel {
+  position:absolute; right:0; top:0; bottom:0; width:280px;
+  background:rgba(15,17,23,0.95); backdrop-filter:blur(10px);
+  border-left:1px solid rgba(64,196,200,0.15);
+  display:flex; flex-direction:column; z-index:11;
+  transform:translateX(100%); transition:transform 0.3s ease;
+}
+.video-chat-panel.open { transform:translateX(0); }
+.video-chat-messages {
+  flex:1; overflow-y:auto; padding:12px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.video-chat-msg {
+  padding:8px 10px; border-radius:8px; font-size:12px; line-height:1.5;
+}
+.video-chat-msg.mine {
+  background:rgba(64,196,200,0.15); color:var(--off-white); align-self:flex-end; max-width:90%;
+}
+.video-chat-msg.theirs {
+  background:rgba(255,255,255,0.06); color:var(--silver); align-self:flex-start; max-width:90%;
+}
+.video-chat-input-row {
+  padding:10px; border-top:1px solid rgba(64,196,200,0.1);
+  display:flex; gap:6px;
+}
+.video-chat-input-row input {
+  flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(64,196,200,0.15);
+  border-radius:8px; padding:8px 10px; color:white; font-size:12px;
+  font-family:var(--font-body); outline:none;
+}
+.video-chat-input-row button {
+  background:var(--teal); border:none; border-radius:8px;
+  padding:0 12px; color:var(--charcoal); font-weight:700; cursor:pointer; font-size:12px;
+}
+
+/* Booking modal */
+.booking-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+  z-index:3500; align-items:center; justify-content:center; padding:1rem;
+}
+.booking-overlay.open { display:flex; }
+.booking-modal {
+  background:var(--charcoal-m); border:1px solid rgba(64,196,200,0.2);
+  border-radius:20px; width:100%; max-width:580px; max-height:90vh;
+  overflow-y:auto; animation:scaleIn 0.25s ease;
+}
+.booking-header {
+  background:linear-gradient(135deg,#0d9488,#40c4c8);
+  padding:1.5rem 1.75rem; border-radius:20px 20px 0 0;
+  display:flex; justify-content:space-between; align-items:flex-start;
+}
+.booking-body { padding:1.5rem 1.75rem; }
+
+/* Tutor card in booking */
+.tutor-select-card {
+  display:flex; align-items:center; gap:12px; padding:12px 14px;
+  background:rgba(255,255,255,0.04); border:2px solid rgba(64,196,200,0.1);
+  border-radius:12px; cursor:pointer; transition:var(--transition); margin-bottom:8px;
+}
+.tutor-select-card:hover,.tutor-select-card.selected {
+  border-color:var(--teal); background:rgba(64,196,200,0.08);
+}
+.tutor-select-avatar {
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal-d),var(--teal));
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; font-weight:700; color:var(--charcoal); flex-shrink:0;
+}
+.tutor-select-name { font-size:13px; font-weight:700; color:var(--off-white); }
+.tutor-select-sub { font-size:11px; color:var(--silver); margin-top:2px; }
+
+/* Session slots */
+.slot-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0; }
+.time-slot {
+  padding:10px 6px; border:1.5px solid rgba(64,196,200,0.15);
+  border-radius:10px; text-align:center; cursor:pointer;
+  font-size:12px; font-weight:600; color:var(--silver);
+  transition:var(--transition); background:rgba(255,255,255,0.03);
+}
+.time-slot:hover,.time-slot.selected {
+  border-color:var(--teal); color:var(--teal); background:rgba(64,196,200,0.1);
+}
+.time-slot.booked { opacity:0.4; cursor:not-allowed; text-decoration:line-through; }
+
+@media(max-width:768px){
+  .video-grid { grid-template-columns:1fr; padding:70px 12px 110px; }
+  .video-tile { aspect-ratio:4/3; }
+  .vc-btn { width:46px; height:46px; font-size:1rem; }
+  .video-chat-panel { width:100%; top:auto; bottom:60px; height:50vh; transform:translateY(100%); }
+  .video-chat-panel.open { transform:translateY(0); }
+  .slot-grid { grid-template-columns:repeat(2,1fr); }
+  .booking-header { padding:1.25rem; }
+  .booking-body { padding:1.25rem; }
+}
+
 </style>
   <!-- Leaflet.js CSS — required for map rendering -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -1497,50 +1810,7 @@ footer {
 </div>
 
 <!-- COMMUNITY PAGE (WebSockets) -->
-<div class="page" id="page-community">
-  <div class="section">
-    <div class="section-header">
-      <div class="section-tag">Level 3 — WebSockets · Real-Time</div>
-      <h2 class="section-title">Community <span style="color:var(--teal)">Chat Rooms</span></h2>
-      <p class="section-sub">Connect with fellow learners in real time. Powered by Socket.io bidirectional WebSockets.</p>
-    </div>
-    <div id="chat-login-prompt" style="max-width:480px;margin:0 auto">
-      <div class="form-container">
-        <div class="form-title">Join the Community</div>
-        <div class="form-sub">Enter your name to join the chat. No account needed!</div>
-        <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="chat-name-input" placeholder="Thabo Learner" onkeydown="if(event.key==='Enter')joinChat()"/></div>
-        <button class="btn-primary" onclick="joinChat()" style="width:100%;padding:12px">Join Community Chat →</button>
-      </div>
-    </div>
-    <div id="chat-area" style="display:none">
-      <div id="chat-container">
-        <div class="chat-sidebar">
-          <div class="chat-sidebar-title">Rooms</div>
-          <div class="chat-room active" onclick="switchRoom('general',this)"><span class="chat-room-dot"></span>General</div>
-          <div class="chat-room" onclick="switchRoom('python',this)"><span class="chat-room-dot" style="background:var(--teal)"></span>Python Help</div>
-          <div class="chat-room" onclick="switchRoom('webdev',this)"><span class="chat-room-dot" style="background:var(--warning)"></span>Web Dev</div>
-          <div class="chat-room" onclick="switchRoom('innovation',this)"><span class="chat-room-dot" style="background:#a78bfa"></span>Innovation Hub</div>
-          <div class="online-count" id="online-count">🟢 Connecting...</div>
-        </div>
-        <div class="chat-main">
-          <div class="chat-header">
-            <div><div class="chat-header-title" id="chat-room-title"># general</div><div class="chat-header-sub">Royal Mercy Institute Community</div></div>
-            <div class="chat-status"><span class="chat-status-dot"></span><span id="chat-status-text">Connected</span></div>
-          </div>
-          <div id="chat-messages"></div>
-          <div class="chat-input-area">
-            <input id="chat-input" type="text" placeholder="Share knowledge with your community..." onkeydown="if(event.key==='Enter')sendMessage()"/>
-            <button class="send-btn" onclick="sendMessage()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ABOUT PAGE -->
 <div class="page" id="page-about">
   <div class="section">
     <div class="section-header">
@@ -2303,8 +2573,9 @@ function renderCourses(courses, targetId='courses-grid') {
       </div>
       <div class="progress-bar" style="margin:12px 0"><div class="progress-fill" style="width:${Math.min(100,c.enrolled/2)}%"></div></div>
       <div style="display:flex;gap:8px;margin-top:auto">
-        <button class="enrol-btn ${state.enrolledIds.includes(c.id)?'enrolled':''}" onclick="toggleEnroll('${c.id}',this)" style="flex:1">
-          ${state.enrolledIds.includes(c.id)?'✓ Enrolled':'Enrol — R100/mo'}
+        <button class="enrol-btn ${state.enrolledIds && state.enrolledIds.includes(c.id)?'enrolled':''}"
+          onclick="toggleEnroll('${c.id}',this)" style="flex:1;min-width:0">
+          ${state.enrolledIds && state.enrolledIds.includes(c.id)?'✓ Enrolled':'Enrol — R100/mo'}
         </button>
         <button onclick="openCourseModal(${JSON.stringify(c).replace(/'/g,'&#39;')})" style="padding:0 14px;background:rgba(64,196,200,0.15);border:1px solid rgba(64,196,200,0.3);color:var(--teal);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:var(--transition)" title="View tutorials, book tutor, join live">📚</button>
       </div>
@@ -2312,22 +2583,7 @@ function renderCourses(courses, targetId='courses-grid') {
     </div>`).join('');
 }
 
-function toggleEnroll(id, btn) {
-  if (!state.user) { openModal('login-modal'); toast('Please sign in to enrol in courses.','info'); return; }
-  if (state.enrolledIds.includes(id)) {
-    state.enrolledIds = state.enrolledIds.filter(e=>e!==id);
-    btn.textContent = 'Enrol Now — Free';
-    btn.classList.remove('enrolled');
-    toast('Unenrolled from course.','info');
-  } else {
-    state.enrolledIds.push(id);
-    btn.textContent = '✓ Enrolled';
-    btn.classList.add('enrolled');
-    toast('Successfully enrolled! 🎓','success');
-  }
-  localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
-  document.getElementById('dash-enrolled').textContent = state.enrolledIds.length;
-}
+
 
 function filterCourses() {
   var q = (document.getElementById('course-search') || {}).value || '';
@@ -2578,9 +2834,12 @@ function switchRoom(room, el) {
   state.chatRoom = room;
   document.querySelectorAll('.chat-room').forEach(r=>r.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('chat-room-title').textContent = `# ${room}`;
+  // Find subject name for this room
+  var subj = typeof RMI_SUBJECTS !== 'undefined' ? RMI_SUBJECTS.find(function(s){ return s.room === room; }) : null;
+  var label = subj ? subj.emoji + ' ' + subj.title + ' (' + subj.phase + ')' : ('# ' + room);
+  document.getElementById('chat-room-title').textContent = label;
   document.getElementById('chat-messages').innerHTML = '';
-  if (state.socket?.connected) state.socket.emit('join', { name: state.chatName, room });
+  if (state.socket && state.socket.connected) state.socket.emit('join', { name: state.chatName, room });
 }
 
 
@@ -2745,17 +3004,40 @@ var plans = {
 function openPayment(user) {
   paymentState.user = user || state.user;
   paymentState.plan = 2;
+  // Reset form fields
+  var nameEl = document.getElementById('pay-name');
+  var cardEl = document.getElementById('pay-card-num');
+  var expEl  = document.getElementById('pay-expiry');
+  var cvvEl  = document.getElementById('pay-cvv');
+  if (nameEl) nameEl.value = '';
+  if (cardEl) cardEl.value = '';
+  if (expEl)  expEl.value  = '';
+  if (cvvEl)  cvvEl.value  = '';
+  // Set plan and method
   selectPlan(2);
   setPayMethod('card');
-  // Set EFT reference
+  // Set EFT reference to user's RMI ID
   var ref = document.getElementById('eft-reference');
-  if (ref && paymentState.user) ref.textContent = paymentState.user.rmiId || paymentState.user.id;
-  document.getElementById('payment-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  if (ref && paymentState.user) {
+    ref.textContent = paymentState.user.rmiId || ('REF-' + (paymentState.user.id || '001'));
+  }
+  // Show overlay
+  var overlay = document.getElementById('payment-overlay');
+  if (overlay) {
+    overlay.classList.add('open');
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  } else {
+    console.error('Payment overlay not found in DOM');
+  }
 }
 
 function closePayment() {
-  document.getElementById('payment-overlay').classList.remove('open');
+  var overlay = document.getElementById('payment-overlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    overlay.style.display = 'none';
+  }
   document.body.style.overflow = '';
 }
 
@@ -2844,29 +3126,41 @@ function submitPayment() {
       '<strong style="color:var(--teal);font-size:1.1rem">' + studentId + '</strong><br>' +
       '<span style="font-size:11px">Save this ID. Plan: <strong>' + plans[paymentState.plan].label + '</strong> · Paid: <strong>R' + p.total + '</strong></span>';
 
-    document.getElementById('payment-success-overlay').classList.add('open');
+    var successOverlay = document.getElementById('payment-success-overlay');
+    if (successOverlay) { successOverlay.style.display = 'flex'; successOverlay.classList.add('open'); }
 
-    // Record payment in state
-    if (user) {
-      state.enrolledIds = state.enrolledIds || [];
-      localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
-      localStorage.setItem('rmi_plan', JSON.stringify({ plan: paymentState.plan, date: new Date().toISOString(), amount: p.total }));
+    // Save payment plan so future enrolments work without repaying
+    var planRecord = {
+      plan:   paymentState.plan,
+      label:  plans[paymentState.plan] ? plans[paymentState.plan].label : '2 Subjects',
+      amount: p.total,
+      method: paymentState.method,
+      date:   new Date().toISOString(),
+      expires: new Date(Date.now() + 30*24*60*60*1000).toISOString() // 30 days
+    };
+    localStorage.setItem('rmi_plan', JSON.stringify(planRecord));
+    if (!state.enrolledIds) state.enrolledIds = [];
+    localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
+
+    // Update state so enrol buttons refresh
+    if (typeof renderCourses === 'function' && state.courses && state.courses.length) {
+      renderCourses(state.courses);
     }
 
-    showToast('✅ Payment successful! Welcome to RMI.', 'success');
+    showToast('✅ Payment successful! You can now enrol in courses.', 'success');
   }, 2200);
 }
 
 function closePaymentSuccess() {
-  document.getElementById('payment-success-overlay').classList.remove('open');
+  var el = document.getElementById('payment-success-overlay');
+  if (el) { el.classList.remove('open'); el.style.display = 'none'; }
   document.body.style.overflow = '';
   navigate('dashboard');
 }
 
-// Open payment from enrol button
+// openEnrolPayment — opens payment for a specific course
 function openEnrolPayment(courseId) {
   if (!state.user) { openModal('login-modal'); showToast('Please sign in to enrol.', 'info'); return; }
-  if (state.user.role !== 'learner') { showToast('Only students can enrol in courses.', 'info'); return; }
   openPayment(state.user);
 }
 
@@ -2897,28 +3191,41 @@ function updateDashboardForRole() {
   if (adminSection) adminSection.style.display  = isAdmin() ? 'block' : 'none';
 }
 
-// Override toggleEnroll to gate behind payment
+// toggleEnroll — gates new enrolments behind payment
 function toggleEnroll(id, btn) {
-  if (!state.user) { openModal('login-modal'); showToast('Please sign in to enrol.', 'info'); return; }
-  if (state.user.role !== 'learner') { showToast('Only registered students can enrol in courses.', 'info'); return; }
-  // Check if already enrolled
-  if (state.enrolledIds && state.enrolledIds.includes(id)) {
-    state.enrolledIds = state.enrolledIds.filter(function(e){ return e !== id; });
-    localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
-    btn.textContent = 'Enrol — R100/mo';
-    btn.classList.remove('enrolled');
-    showToast('Unenrolled from course.', 'info');
-  } else {
-    // Gate: must have paid
-    var plan = JSON.parse(localStorage.getItem('rmi_plan') || 'null');
-    if (!plan) { openEnrolPayment(id); return; }
-    if (!state.enrolledIds) state.enrolledIds = [];
-    state.enrolledIds.push(id);
-    localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
-    btn.textContent = '✓ Enrolled';
-    btn.classList.add('enrolled');
-    showToast('✅ Successfully enrolled!', 'success');
+  if (!state.user) {
+    openModal('login-modal');
+    showToast('Please sign in to enrol in a course.', 'info');
+    return;
   }
+  // Tutors/admins can preview but not enrol
+  if (state.user.role === 'tutor') {
+    showToast('Tutor accounts cannot enrol as students.', 'info');
+    return;
+  }
+  // Un-enrol if already enrolled
+  if (state.enrolledIds && state.enrolledIds.includes(id)) {
+    state.enrolledIds = state.enrolledIds.filter(function(e) { return e !== id; });
+    localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
+    if (btn) { btn.textContent = 'Enrol — R100/mo'; btn.classList.remove('enrolled'); }
+    showToast('Unenrolled from course.', 'info');
+    return;
+  }
+  // Check if student has an active payment plan
+  var plan = null;
+  try { plan = JSON.parse(localStorage.getItem('rmi_plan') || 'null'); } catch(e) {}
+  if (!plan) {
+    // No plan — open payment modal
+    openPayment(state.user);
+    showToast('Please complete payment to enrol.', 'info');
+    return;
+  }
+  // Paid — enrol directly
+  if (!state.enrolledIds) state.enrolledIds = [];
+  state.enrolledIds.push(id);
+  localStorage.setItem('rmi_enrolled', JSON.stringify(state.enrolledIds));
+  if (btn) { btn.textContent = '✓ Enrolled'; btn.classList.add('enrolled'); }
+  showToast('✅ Successfully enrolled!', 'success');
 }
 
 
@@ -3062,6 +3369,475 @@ function handlePOPUpload(input) {
 }
 </script>
 
+
+<script>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUBJECT DATA — all phases and categories for booking grid
+// ═══════════════════════════════════════════════════════════════════════════
+
+var RMI_SUBJECTS = [
+  // PRIMARY SCHOOL
+  { id:'nat-sci',    title:'Natural Sciences',       phase:'Primary School', color:'#22c55e', room:'natural-sciences',   emoji:'🌿' },
+  { id:'tech-pri',   title:'Technology',             phase:'Primary School', color:'#f97316', room:'technology-primary', emoji:'⚙️' },
+  { id:'soc-sci',    title:'Social Sciences',        phase:'Primary School', color:'#06b6d4', room:'social-sciences',    emoji:'🌍' },
+  { id:'rob-pri',    title:'Robotics',               phase:'Primary School', color:'#8b5cf6', room:'robotics-primary',   emoji:'🤖' },
+  { id:'code-pri',   title:'Intro to Coding',        phase:'Primary School', color:'#ec4899', room:'coding-primary',     emoji:'💡' },
+  // HIGH SCHOOL
+  { id:'maths',      title:'Mathematics',            phase:'High School',    color:'#3b82f6', room:'mathematics',        emoji:'📐' },
+  { id:'maths-lit',  title:'Maths Literacy',         phase:'High School',    color:'#60a5fa', room:'maths-lit',          emoji:'🔢' },
+  { id:'physics',    title:'Physics',                phase:'High School',    color:'#f59e0b', room:'physics',            emoji:'⚡' },
+  { id:'chemistry',  title:'Chemistry',              phase:'High School',    color:'#10b981', room:'chemistry',          emoji:'⚗️' },
+  { id:'life-sci',   title:'Life Sciences',          phase:'High School',    color:'#84cc16', room:'life-sciences',      emoji:'🧬' },
+  { id:'geo',        title:'Geography',              phase:'High School',    color:'#14b8a6', room:'geography',          emoji:'🗺️' },
+  { id:'cat',        title:'CAT',                    phase:'High School',    color:'#6366f1', room:'cat',                emoji:'🖥️' },
+  { id:'cs-hs',      title:'Computer Science',       phase:'High School',    color:'#8b5cf6', room:'computer-science-hs',emoji:'💻' },
+  { id:'python-hs',  title:'Python Programming',     phase:'High School',    color:'#40c4c8', room:'python-hs',          emoji:'🐍' },
+  { id:'rob-hs',     title:'Robotics',               phase:'High School',    color:'#ec4899', room:'robotics-hs',        emoji:'🤖' },
+  { id:'cyber-hs',   title:'Cybersecurity',          phase:'High School',    color:'#ef4444', room:'cybersecurity-hs',   emoji:'🔐' },
+  // UNIVERSITY
+  { id:'data-sci',   title:'Data Science',           phase:'University',     color:'#f97316', room:'data-science',       emoji:'📊' },
+  { id:'ai-ml',      title:'AI & Machine Learning',  phase:'University',     color:'#a855f7', room:'ai-ml',              emoji:'🧠' },
+  { id:'webdev',     title:'Web Development',        phase:'University',     color:'#06b6d4', room:'webdev',             emoji:'🌐' },
+  { id:'mobile',     title:'Mobile Development',     phase:'University',     color:'#84cc16', room:'mobile-dev',         emoji:'📱' },
+  { id:'cs-uni',     title:'Computer Science',       phase:'University',     color:'#3b82f6', room:'computer-science-uni',emoji:'🎓' },
+  { id:'rob-uni',    title:'Robotics',               phase:'University',     color:'#8b5cf6', room:'robotics-uni',       emoji:'🦾' },
+  { id:'cyber-uni',  title:'Cybersecurity',          phase:'University',     color:'#ef4444', room:'cybersecurity-uni',  emoji:'🛡️' },
+];
+
+var RMI_TUTORS = [
+  { name:'Mohau Mokoena',  subjects:['All'],            rating:'5.0', sessions:120, initials:'MM', color:'#0d9488' },
+  { name:'Lesedi Masha',   subjects:['Mathematics','Physics','Chemistry'], rating:'4.9', sessions:38, initials:'LM', color:'#3b82f6' },
+  { name:'Sebabatso N.',   subjects:['Life Sciences','Geography','Social Sciences'], rating:'4.8', sessions:24, initials:'SN', color:'#22c55e' },
+  { name:'Thabo K.',       subjects:['Physics','Chemistry','CAT'], rating:'4.7', sessions:31, initials:'TK', color:'#f59e0b' },
+  { name:'Aisha P.',       subjects:['Robotics','Computer Science','Coding','CAT'], rating:'4.9', sessions:45, initials:'AP', color:'#ec4899' },
+  { name:'Neo D.',         subjects:['Natural Sciences','Technology','Social Sciences'], rating:'4.8', sessions:19, initials:'ND', color:'#f97316' },
+  { name:'Kwame J.',       subjects:['Data Science','AI & Machine Learning','Python Programming'], rating:'4.9', sessions:27, initials:'KJ', color:'#a855f7' },
+  { name:'Zanele M.',      subjects:['Web Development','Mobile Development','Python Programming'], rating:'4.8', sessions:33, initials:'ZM', color:'#06b6d4' },
+];
+
+var TIME_SLOTS = [
+  '08:00','09:00','10:00','11:00','12:00','13:00',
+  '14:00','15:00','16:00','17:00','18:00','19:00'
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BOOKING SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+
+var bookingState = {
+  phase: 'all',
+  subject: null,
+  tutor: null,
+  date: null,
+  time: null,
+  type: '1on1'
+};
+
+function setBookingPhase(phase, btn) {
+  bookingState.phase = phase;
+  document.querySelectorAll('[id^="bk-tab"]').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderBookingSubjects();
+}
+
+function renderBookingSubjects() {
+  var grid = document.getElementById('booking-subjects-grid');
+  if (!grid) return;
+  var subjects = RMI_SUBJECTS;
+  if (bookingState.phase !== 'all') {
+    subjects = subjects.filter(function(s){ return s.phase === bookingState.phase; });
+  }
+  grid.innerHTML = subjects.map(function(s) {
+    return '<div class="card" style="cursor:pointer;border:2px solid rgba(64,196,200,0.1);transition:var(--transition)" '
+      + 'onclick="openBooking(\'' + s.id + '\')" '
+      + 'onmouseover="this.style.borderColor=\'' + s.color + '\'" '
+      + 'onmouseout="this.style.borderColor=\'rgba(64,196,200,0.1)\'">'
+      + '<div style="font-size:2rem;margin-bottom:8px">' + s.emoji + '</div>'
+      + '<div style="font-size:14px;font-weight:700;color:var(--off-white);margin-bottom:4px">' + s.title + '</div>'
+      + '<div style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;display:inline-block;background:rgba(64,196,200,0.1);color:var(--teal)">' + s.phase + '</div>'
+      + '<div style="margin-top:12px;font-size:12px;color:var(--silver)">'
+      + RMI_TUTORS.filter(function(t){ return t.subjects.includes('All') || t.subjects.some(function(x){ return x.toLowerCase().includes(s.title.toLowerCase().split(' ')[0]); }); }).length
+      + ' tutors available</div>'
+      + '<button style="margin-top:10px;width:100%;padding:9px;background:linear-gradient(135deg,var(--teal-d),var(--teal));border:none;border-radius:8px;color:var(--charcoal);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body)">Book Session →</button>'
+      + '</div>';
+  }).join('');
+}
+
+function openBooking(subjectId) {
+  if (!state.user) { openModal('login-modal'); showToast('Please sign in to book a session.', 'info'); return; }
+  var subject = RMI_SUBJECTS.find(function(s){ return s.id === subjectId; });
+  if (!subject) return;
+  bookingState.subject = subject;
+  bookingState.tutor   = null;
+  bookingState.date    = null;
+  bookingState.time    = null;
+
+  document.getElementById('booking-subject-title').textContent = 'Book: ' + subject.title;
+  document.getElementById('booking-subject-sub').textContent   = subject.phase + ' · Select a tutor and time below';
+
+  // Set min date to today
+  var today = new Date().toISOString().split('T')[0];
+  document.getElementById('booking-date').min   = today;
+  document.getElementById('booking-date').value = today;
+
+  // Render tutor list
+  var matchedTutors = RMI_TUTORS.filter(function(t) {
+    return t.subjects.includes('All') || t.subjects.some(function(x){ return x.toLowerCase().includes(subject.title.toLowerCase().split(' ')[0]); });
+  });
+  if (!matchedTutors.length) matchedTutors = RMI_TUTORS;
+
+  document.getElementById('booking-tutor-list').innerHTML = matchedTutors.map(function(t) {
+    return '<div class="tutor-select-card" id="bk-tutor-' + t.initials + '" onclick="selectBookingTutor(\'' + t.initials + '\',\'' + t.name + '\')">'
+      + '<div class="tutor-select-avatar" style="background:linear-gradient(135deg,' + t.color + '99,' + t.color + ')">' + t.initials + '</div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="tutor-select-name">' + t.name + '</div>'
+      + '<div class="tutor-select-sub">⭐ ' + t.rating + ' · ' + t.sessions + ' sessions · ' + t.subjects.join(', ') + '</div>'
+      + '</div>'
+      + '<div style="font-size:20px">○</div>'
+      + '</div>';
+  }).join('');
+
+  loadTimeSlots();
+  document.getElementById('booking-confirm-btn').disabled = true;
+  document.getElementById('booking-summary').style.display = 'none';
+  var bo=document.getElementById('booking-overlay'); if(bo){bo.style.display='flex';bo.classList.add('open');}
+  document.body.style.overflow = 'hidden';
+}
+
+function selectBookingTutor(initials, name) {
+  bookingState.tutor = { initials: initials, name: name };
+  document.querySelectorAll('.tutor-select-card').forEach(function(c){ c.classList.remove('selected'); });
+  var card = document.getElementById('bk-tutor-' + initials);
+  if (card) { card.classList.add('selected'); card.querySelector('div:last-child').textContent = '✓'; }
+  updateBookingSummary();
+}
+
+function loadTimeSlots() {
+  var grid = document.getElementById('booking-slots-grid');
+  if (!grid) return;
+  // Randomly mark some as booked for realism
+  var booked = [2,5,8];
+  grid.innerHTML = TIME_SLOTS.map(function(t, i) {
+    var isBooked = booked.includes(i);
+    return '<div class="time-slot' + (isBooked?' booked':'') + '" id="slot-' + i + '" '
+      + (isBooked ? '' : 'onclick="selectTimeSlot(\'' + t + '\',this)"') + '>'
+      + t + (isBooked ? '<br><span style="font-size:9px">Taken</span>' : '') + '</div>';
+  }).join('');
+}
+
+function selectTimeSlot(time, el) {
+  bookingState.time = time;
+  document.querySelectorAll('.time-slot').forEach(function(s){ s.classList.remove('selected'); });
+  el.classList.add('selected');
+  updateBookingSummary();
+}
+
+function updateBookingSummary() {
+  if (!bookingState.tutor || !bookingState.time) return;
+  var dateEl = document.getElementById('booking-date');
+  var date   = dateEl ? dateEl.value : 'TBD';
+  var type   = (document.getElementById('booking-type') || {}).value === 'group' ? 'Group Session' : '1-on-1 Private';
+  document.getElementById('sum-subject').textContent  = bookingState.subject ? bookingState.subject.title : '—';
+  document.getElementById('sum-tutor').textContent    = bookingState.tutor.name;
+  document.getElementById('sum-datetime').textContent = date + ' at ' + bookingState.time;
+  document.getElementById('sum-type').textContent     = type;
+  document.getElementById('booking-summary').style.display = 'block';
+  document.getElementById('booking-confirm-btn').disabled  = false;
+}
+
+function confirmBooking() {
+  if (!bookingState.tutor || !bookingState.time) {
+    showToast('Please select a tutor and time slot.', 'error');
+    return;
+  }
+  var btn = document.getElementById('booking-confirm-btn');
+  btn.textContent = '⏳ Confirming...';
+  btn.disabled = true;
+
+  setTimeout(function() {
+    closeBooking();
+    // Save booking to state
+    state.bookings = state.bookings || [];
+    state.bookings.push({
+      id: Date.now(),
+      subject:  bookingState.subject.title,
+      phase:    bookingState.subject.phase,
+      tutor:    bookingState.tutor.name,
+      tutorInitials: bookingState.tutor.initials,
+      date:     document.getElementById('booking-date').value,
+      time:     bookingState.time,
+      type:     document.getElementById('booking-type').value,
+      room:     bookingState.subject.room,
+      status:   'confirmed'
+    });
+    showToast('✅ Session booked with ' + bookingState.tutor.name + ' on ' + document.getElementById('booking-date').value + ' at ' + bookingState.time + '!', 'success');
+    // Show join button option
+    setTimeout(function() {
+      showToast('💡 Tip: Join your session from the Community page or Dashboard.', 'info');
+    }, 3000);
+  }, 1400);
+}
+
+function closeBooking() {
+  var bo = document.getElementById('booking-overlay');
+  if (bo) { bo.classList.remove('open'); bo.style.display = 'none'; }
+  document.body.style.overflow = '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VIDEO CALL (WebRTC + getUserMedia)
+// ═══════════════════════════════════════════════════════════════════════════
+
+var vcState = {
+  localStream:  null,
+  remoteStream: null,
+  peerConn:     null,
+  micOn:  true,
+  camOn:  true,
+  chatOpen: false,
+  timerInterval: null,
+  seconds: 0,
+  subject: '',
+  tutor:   '',
+  screenStream: null
+};
+
+function startVideoCall(subjectTitle, tutorName, tutorInitials) {
+  if (!state.user) { openModal('login-modal'); return; }
+
+  vcState.subject = subjectTitle || 'Live Session';
+  vcState.tutor   = tutorName   || 'Your Tutor';
+
+  document.getElementById('vc-title').textContent     = vcState.subject;
+  document.getElementById('vc-sub').textContent       = 'Session with ' + vcState.tutor;
+  document.getElementById('vc-remote-name').textContent = vcState.tutor;
+  document.getElementById('vc-remote-label').textContent = vcState.tutor;
+
+  var myName  = state.user ? state.user.name : 'You';
+  var initials = myName.split(' ').map(function(n){ return n[0]; }).join('').slice(0,2).toUpperCase();
+  document.getElementById('vc-local-initials').textContent = initials;
+  document.getElementById('vc-local-label').textContent    = myName + ' (You)';
+  document.getElementById('vc-local-name').textContent     = myName;
+  document.getElementById('vc-remote-initials').textContent = tutorInitials || 'T';
+
+  var vco=document.getElementById('video-call-overlay'); if(vco){vco.style.display='flex';vco.classList.add('open');}
+  document.body.style.overflow = 'hidden';
+
+  vcState.seconds = 0;
+  vcState.timerInterval = setInterval(function() {
+    vcState.seconds++;
+    var m = Math.floor(vcState.seconds / 60);
+    var s = vcState.seconds % 60;
+    document.getElementById('vc-timer').textContent =
+      (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }, 1000);
+
+  // Request camera and mic
+  navigator.mediaDevices.getUserMedia({ video:true, audio:true })
+    .then(function(stream) {
+      vcState.localStream = stream;
+      var video = document.getElementById('vc-local-video');
+      video.srcObject = stream;
+      video.style.display = 'block';
+      document.getElementById('vc-local-placeholder').style.display = 'none';
+      showToast('📹 Camera and microphone connected!', 'success');
+
+      // Simulate remote after 2s (in production: WebRTC signalling via socket.io)
+      setTimeout(function() {
+        document.getElementById('vc-remote-name').textContent = vcState.tutor + ' (Joined)';
+        document.getElementById('vc-remote-placeholder').style.background =
+          'linear-gradient(135deg,rgba(13,148,136,0.3),rgba(64,196,200,0.1))';
+        showToast('✅ ' + vcState.tutor + ' has joined the session!', 'success');
+        // Add welcome message to session chat
+        vcAddChatMsg(vcState.tutor, 'Hello! Welcome to your session. What would you like to work on today?', false);
+      }, 2000);
+    })
+    .catch(function(err) {
+      console.warn('Camera access denied:', err);
+      showToast('⚠️ Camera/mic access denied. Audio-only mode.', 'info');
+    });
+}
+
+function endVideoCall() {
+  if (vcState.localStream) {
+    vcState.localStream.getTracks().forEach(function(t){ t.stop(); });
+    vcState.localStream = null;
+  }
+  if (vcState.screenStream) {
+    vcState.screenStream.getTracks().forEach(function(t){ t.stop(); });
+    vcState.screenStream = null;
+  }
+  if (vcState.timerInterval) {
+    clearInterval(vcState.timerInterval);
+    vcState.timerInterval = null;
+  }
+  var video = document.getElementById('vc-local-video');
+  if (video) { video.srcObject = null; video.style.display = 'none'; }
+  var remote = document.getElementById('vc-remote-video');
+  if (remote) { remote.srcObject = null; remote.style.display = 'none'; }
+  document.getElementById('vc-local-placeholder').style.display  = 'flex';
+  document.getElementById('vc-remote-placeholder').style.display = 'flex';
+  var vcoe=document.getElementById('video-call-overlay'); if(vcoe){vcoe.classList.remove('open');vcoe.style.display='none';}
+  document.getElementById('vc-chat-panel').classList.remove('open');
+  document.getElementById('vc-chat-messages').innerHTML = '';
+  document.getElementById('vc-timer').textContent = '00:00';
+  document.body.style.overflow = '';
+  vcState.seconds = 0;
+  showToast('Session ended. Duration: ' + document.getElementById('vc-timer').textContent, 'info');
+}
+
+function vcToggleMic() {
+  vcState.micOn = !vcState.micOn;
+  if (vcState.localStream) {
+    vcState.localStream.getAudioTracks().forEach(function(t){ t.enabled = vcState.micOn; });
+  }
+  var btn = document.getElementById('vc-mic-btn');
+  btn.textContent = vcState.micOn ? '🎤' : '🔇';
+  btn.style.background = vcState.micOn ? 'rgba(255,255,255,0.12)' : '#ef4444';
+}
+
+function vcToggleCam() {
+  vcState.camOn = !vcState.camOn;
+  if (vcState.localStream) {
+    vcState.localStream.getVideoTracks().forEach(function(t){ t.enabled = vcState.camOn; });
+  }
+  var video = document.getElementById('vc-local-video');
+  var placeholder = document.getElementById('vc-local-placeholder');
+  if (vcState.camOn) {
+    if (video) video.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+  } else {
+    if (video) video.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'flex';
+  }
+  var btn = document.getElementById('vc-cam-btn');
+  btn.textContent = vcState.camOn ? '📷' : '🚫';
+  btn.style.background = vcState.camOn ? 'rgba(255,255,255,0.12)' : '#ef4444';
+}
+
+function vcShareScreen() {
+  if (vcState.screenStream) {
+    vcState.screenStream.getTracks().forEach(function(t){ t.stop(); });
+    vcState.screenStream = null;
+    document.getElementById('vc-screen-btn').style.background = 'rgba(255,255,255,0.12)';
+    showToast('Screen sharing stopped.', 'info');
+    return;
+  }
+  if (!navigator.mediaDevices.getDisplayMedia) {
+    showToast('Screen sharing not supported on this device.', 'error');
+    return;
+  }
+  navigator.mediaDevices.getDisplayMedia({ video:true })
+    .then(function(stream) {
+      vcState.screenStream = stream;
+      document.getElementById('vc-screen-btn').style.background = 'var(--teal)';
+      showToast('🖥️ Screen sharing started!', 'success');
+      stream.getVideoTracks()[0].onended = function() {
+        vcState.screenStream = null;
+        document.getElementById('vc-screen-btn').style.background = 'rgba(255,255,255,0.12)';
+      };
+    })
+    .catch(function(e) { showToast('Screen sharing cancelled.', 'info'); });
+}
+
+function vcToggleChat() {
+  vcState.chatOpen = !vcState.chatOpen;
+  var panel = document.getElementById('vc-chat-panel');
+  panel.classList.toggle('open', vcState.chatOpen);
+  var btn = document.getElementById('vc-chat-btn');
+  btn.style.background = vcState.chatOpen ? 'var(--teal)' : 'rgba(255,255,255,0.12)';
+}
+
+function vcSendChat() {
+  var input = document.getElementById('vc-chat-input');
+  var text  = input.value.trim();
+  if (!text) return;
+  vcAddChatMsg('You', text, true);
+  input.value = '';
+  // Simulate tutor reply
+  setTimeout(function() {
+    var replies = [
+      'Great question! Let me explain that.',
+      'I see, let me show you a better approach.',
+      'Exactly right! Keep going.',
+      'Let me draw that out for you.',
+      'That is the most common mistake — here is the fix.',
+    ];
+    vcAddChatMsg(vcState.tutor, replies[Math.floor(Math.random()*replies.length)], false);
+  }, 1200);
+}
+
+function vcAddChatMsg(sender, text, isMe) {
+  var box = document.getElementById('vc-chat-messages');
+  if (!box) return;
+  var div = document.createElement('div');
+  div.className = 'video-chat-msg ' + (isMe ? 'mine' : 'theirs');
+  div.innerHTML = '<strong style="font-size:10px;display:block;margin-bottom:3px;opacity:0.7">' + sender + '</strong>' + text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── Patch bookTutor to open real video call ───────────────
+function bookTutor(tutorName, courseTitle) {
+  if (!state.user) { openModal('login-modal'); showToast('Please sign in to book a session.', 'error'); return; }
+  var tutor = RMI_TUTORS.find(function(t){ return t.name === tutorName; }) || { initials: tutorName.split(' ').map(function(n){ return n[0]; }).join('').slice(0,2).toUpperCase() };
+  // Show booking modal
+  var subject = RMI_SUBJECTS.find(function(s){ return courseTitle && courseTitle.toLowerCase().includes(s.title.toLowerCase().split(' ')[0]); });
+  if (subject) {
+    openBooking(subject.id);
+  } else {
+    showToast('Booking request sent to ' + tutorName + '. They will contact you within 24 hours.', 'success');
+  }
+}
+
+// ── Join session from booked list ─────────────────────────
+function joinBookedSession(booking) {
+  var tutor = RMI_TUTORS.find(function(t){ return t.name === booking.tutor; }) || {};
+  startVideoCall(booking.subject, booking.tutor, tutor.initials || 'T');
+}
+
+// Init booking grid on community page load
+document.addEventListener('DOMContentLoaded', function() {
+  renderBookingSubjects();
+});
+
+
+</script>
+
+<script>
+function openBookingForCurrentRoom() {
+  var room = state.chatRoom || 'general';
+  var subject = RMI_SUBJECTS.find(function(s){ return s.room === room; });
+  if (subject) { openBooking(subject.id); }
+  else { showToast('Select a subject room first to book a session.', 'info'); }
+}
+</script>
+
+<script>
+function openBookingFromChat() {
+  var room = state.chatRoom || 'general';
+  var subject = RMI_SUBJECTS.find(function(s){ return s.room === room; });
+  if (subject) { openBooking(subject.id); }
+  else { showToast('Switch to a subject room first, then click Book Session.', 'info'); }
+}
+
+// Call renderBookingSubjects whenever community page opens
+var _origNav2 = window.navigate;
+window.addEventListener('load', function() {
+  var _nav = window.navigate;
+  if (typeof _nav === 'function' && !_nav._bookingPatched) {
+    window.navigate = function(page) {
+      _nav(page);
+      if (page === 'community' && typeof renderBookingSubjects === 'function') {
+        setTimeout(renderBookingSubjects, 100);
+      }
+    };
+    window.navigate._bookingPatched = true;
+  }
+});
+</script>
+
 <!-- Leaflet Map -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -3150,7 +3926,7 @@ function handlePOPUpload(input) {
 <!-- ═══════════════════════════════════════════════
      PAYMENT MODAL
 ════════════════════════════════════════════════ -->
-<div class="payment-overlay" id="payment-overlay">
+<div class="payment-overlay" id="payment-overlay" style="display:none;">
   <div class="payment-modal">
 
     <!-- Header -->
@@ -3288,7 +4064,7 @@ function handlePOPUpload(input) {
 </div>
 
 <!-- Payment Success Modal -->
-<div class="payment-overlay" id="payment-success-overlay" style="z-index:3100">
+<div class="payment-overlay" id="payment-success-overlay" style="z-index:3100;display:none">
   <div class="payment-modal" style="max-width:420px;text-align:center">
     <div style="padding:2rem 1.75rem">
       <div style="font-size:4rem;margin-bottom:1rem">✅</div>
@@ -3305,5 +4081,352 @@ function handlePOPUpload(input) {
   </div>
 </div>
 
+
+<!-- ═══ VIDEO CALL MODAL ═══ -->
+<div class="vcall-overlay" id="vcall-overlay">
+  <div class="vcall-container">
+    <div class="vcall-header">
+      <div>
+        <div class="vcall-title" id="vcall-title">Live Session</div>
+        <div class="vcall-subtitle" id="vcall-subtitle">Royal Mercy Institute</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="vcall-status connecting" id="vcall-status">Connecting...</span>
+        <button onclick="endCall()" style="background:none;border:none;color:var(--silver);cursor:pointer;font-size:1.2rem">✕</button>
+      </div>
+    </div>
+    <div class="vcall-videos">
+      <!-- Remote (tutor) video -->
+      <div class="vcall-video-wrap">
+        <video id="vcall-remote-video" autoplay playsinline></video>
+        <div class="vcall-video-placeholder" id="vcall-remote-placeholder">
+          <div class="vcall-avatar-big" id="vcall-remote-avatar">TU</div>
+          <div class="vcall-name" id="vcall-remote-name">Waiting for tutor...</div>
+        </div>
+        <div class="vcall-video-label" id="vcall-remote-label">Tutor</div>
+      </div>
+      <!-- Local (student) video -->
+      <div class="vcall-video-wrap">
+        <video id="vcall-local-video" autoplay playsinline muted></video>
+        <div class="vcall-video-placeholder" id="vcall-local-placeholder">
+          <div class="vcall-avatar-big" id="vcall-local-avatar">ME</div>
+          <div class="vcall-name">Camera off / No permission</div>
+        </div>
+        <div class="vcall-video-label">You</div>
+      </div>
+    </div>
+    <div class="vcall-controls">
+      <button class="vcall-btn mic" id="vcall-mic-btn" onclick="toggleMic()" title="Mute/Unmute">🎙️</button>
+      <button class="vcall-btn cam" id="vcall-cam-btn" onclick="toggleCam()" title="Camera on/off">📷</button>
+      <button class="vcall-btn hang" onclick="endCall()" title="End call">📵</button>
+    </div>
+  </div>
+  <!-- Q&A chat strip below video -->
+  <div class="vcall-chat-strip">
+    <input id="vcall-chat-input" placeholder="Ask a question during the session..." onkeydown="if(event.key==='Enter')sendCallMessage()"/>
+    <button onclick="sendCallMessage()">Send</button>
+  </div>
+</div>
+
+<!-- ═══ BOOKING MODAL ═══ -->
+<div class="booking-overlay" id="booking-overlay" style="display:none">
+  <div class="booking-modal">
+    <div class="booking-header">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:var(--off-white)">📅 Book a Session</div>
+        <div style="font-size:11px;color:var(--silver);margin-top:2px" id="booking-subtitle">Choose your tutor and time slot</div>
+      </div>
+      <button onclick="closeBooking()" style="background:none;border:none;color:var(--silver);cursor:pointer;font-size:1.3rem">✕</button>
+    </div>
+    <div class="booking-body">
+
+      <!-- Tutor select -->
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--silver);margin-bottom:10px">Select Tutor / Mentor / Educator</div>
+        <div id="booking-tutor-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <!-- Time slots -->
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--silver);margin-bottom:10px">Available Time Slots</div>
+        <div class="booking-slots" id="booking-slots-grid"></div>
+      </div>
+
+      <!-- Session type -->
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--silver);margin-bottom:10px">Session Type</div>
+        <div style="display:flex;gap:8px">
+          <button class="slot-btn selected" id="type-video" onclick="setSessionType('video',this)" style="flex:1">📹 Video Call</button>
+          <button class="slot-btn" id="type-chat" onclick="setSessionType('chat',this)" style="flex:1">💬 Chat Session</button>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div style="margin-bottom:1.25rem">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--silver);display:block;margin-bottom:6px">Topic / Questions (optional)</label>
+        <textarea id="booking-notes" class="form-input" rows="2" placeholder="e.g. I need help with quadratic equations and factorisation..." style="resize:none;font-family:var(--font-body);font-size:13px"></textarea>
+      </div>
+
+      <div style="background:rgba(64,196,200,0.06);border:1px solid rgba(64,196,200,0.15);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--silver);margin-bottom:1.25rem;line-height:1.7">
+        ✅ Included in your subscription · The tutor will confirm within 2 hours<br>
+        📹 Video sessions happen directly in the RMI platform — no external app needed
+      </div>
+
+      <button onclick="confirmBooking()" style="width:100%;padding:13px;background:linear-gradient(135deg,#0d9488,#40c4c8);border:none;border-radius:10px;color:#0f1117;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font-body)">
+        Confirm Booking
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     VIDEO CALL OVERLAY (WebRTC)
+════════════════════════════════════════════ -->
+<div id="video-call-overlay">
+
+  <!-- Header bar -->
+  <div class="video-call-header">
+    <div>
+      <div class="video-call-title" id="vc-title">Live Session</div>
+      <div class="video-call-sub" id="vc-sub">Connecting...</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="video-timer" id="vc-timer">00:00</div>
+      <div id="vc-status" style="font-size:12px;color:rgba(255,255,255,0.5)">🔴 Live</div>
+    </div>
+  </div>
+
+  <!-- Video grid -->
+  <div class="video-grid">
+    <!-- Local (you) -->
+    <div class="video-tile" id="vc-local-tile">
+      <video id="vc-local-video" autoplay muted playsinline></video>
+      <div class="video-avatar-placeholder" id="vc-local-placeholder">
+        <div class="video-avatar-circle" id="vc-local-initials">?</div>
+        <div class="video-avatar-name" id="vc-local-name">You</div>
+      </div>
+      <div class="video-tile-label" id="vc-local-label">You</div>
+    </div>
+    <!-- Remote (tutor/learner) -->
+    <div class="video-tile" id="vc-remote-tile">
+      <video id="vc-remote-video" autoplay playsinline></video>
+      <div class="video-avatar-placeholder" id="vc-remote-placeholder">
+        <div class="video-avatar-circle" id="vc-remote-initials">T</div>
+        <div class="video-avatar-name" id="vc-remote-name">Waiting for tutor...</div>
+      </div>
+      <div class="video-tile-label" id="vc-remote-label">Tutor</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="video-controls">
+    <button class="vc-btn dark" id="vc-mic-btn" onclick="vcToggleMic()" title="Toggle microphone">🎤</button>
+    <button class="vc-btn dark" id="vc-cam-btn" onclick="vcToggleCam()" title="Toggle camera">📷</button>
+    <button class="vc-btn red" onclick="endVideoCall()" title="End call" style="width:64px;height:64px;font-size:1.5rem">📵</button>
+    <button class="vc-btn dark" id="vc-screen-btn" onclick="vcShareScreen()" title="Share screen">🖥️</button>
+    <button class="vc-btn dark" id="vc-chat-btn" onclick="vcToggleChat()" title="Session chat">💬</button>
+  </div>
+
+  <!-- Slide-in chat panel -->
+  <div class="video-chat-panel" id="vc-chat-panel">
+    <div style="padding:12px 14px;border-bottom:1px solid rgba(64,196,200,0.12);font-size:13px;font-weight:700;color:var(--teal);display:flex;justify-content:space-between;align-items:center">
+      Session Chat <button onclick="vcToggleChat()" style="background:none;border:none;color:var(--silver);cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div class="video-chat-messages" id="vc-chat-messages"></div>
+    <div class="video-chat-input-row">
+      <input id="vc-chat-input" placeholder="Ask a question..." onkeydown="if(event.key==='Enter')vcSendChat()"/>
+      <button onclick="vcSendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     BOOKING MODAL
+════════════════════════════════════════════ -->
+<div class="booking-overlay" id="booking-overlay">
+  <div class="booking-modal">
+    <div class="booking-header">
+      <div>
+        <div style="font-size:1.1rem;font-weight:800;color:#0f1117" id="booking-subject-title">Book a Session</div>
+        <div style="font-size:12px;color:rgba(15,17,23,0.7);margin-top:3px" id="booking-subject-sub">Select a tutor and time slot</div>
+      </div>
+      <button onclick="closeBooking()" style="background:rgba(0,0,0,0.15);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:#0f1117;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div class="booking-body">
+
+      <!-- Step 1: Choose tutor -->
+      <div id="booking-step-1">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--silver);margin-bottom:10px">Step 1 — Choose a Tutor / Educator</div>
+        <div id="booking-tutor-list"></div>
+      </div>
+
+      <!-- Step 2: Choose date/time -->
+      <div id="booking-step-2" style="margin-top:1.25rem">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--silver);margin-bottom:10px">Step 2 — Pick a Date & Time</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:12px;color:var(--silver);display:block;margin-bottom:4px">Date</label>
+            <input type="date" id="booking-date" class="form-input" style="font-size:13px;padding:8px 12px" onchange="loadTimeSlots()"/>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--silver);display:block;margin-bottom:4px">Session Type</label>
+            <select id="booking-type" class="form-input" style="font-size:13px;padding:8px 12px;cursor:pointer">
+              <option value="1on1">🎯 1-on-1 (Private)</option>
+              <option value="group">👥 Group Session (up to 6)</option>
+            </select>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--silver);margin-bottom:8px">Available Time Slots</div>
+        <div class="slot-grid" id="booking-slots-grid"></div>
+      </div>
+
+      <!-- Step 3: Session notes -->
+      <div id="booking-step-3" style="margin-top:1.25rem">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--silver);margin-bottom:8px">Step 3 — What do you need help with?</div>
+        <textarea id="booking-notes" class="form-input" rows="3" placeholder="e.g. I need help understanding quadratic equations and sketching parabolas..." style="font-size:13px;resize:vertical;line-height:1.6"></textarea>
+      </div>
+
+      <!-- Summary -->
+      <div id="booking-summary" style="margin-top:1.25rem;padding:14px;background:rgba(64,196,200,0.06);border:1px solid rgba(64,196,200,0.15);border-radius:12px;font-size:12px;color:var(--silver);line-height:1.9;display:none">
+        <div style="font-weight:700;color:var(--teal);margin-bottom:6px">📋 Booking Summary</div>
+        <div>Subject: <strong id="sum-subject" style="color:var(--off-white)">—</strong></div>
+        <div>Tutor: <strong id="sum-tutor" style="color:var(--off-white)">—</strong></div>
+        <div>Date & Time: <strong id="sum-datetime" style="color:var(--off-white)">—</strong></div>
+        <div>Type: <strong id="sum-type" style="color:var(--off-white)">—</strong></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--silver-d)">✅ Included in your subscription · Join via the Live Sessions button</div>
+      </div>
+
+      <button id="booking-confirm-btn" onclick="confirmBooking()" style="width:100%;margin-top:1.25rem;padding:13px;background:linear-gradient(135deg,#0d9488,#40c4c8);border:none;border-radius:12px;color:#0f1117;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font-body);transition:var(--transition)" disabled>
+        Confirm Booking
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
-</html>
+</html><div id="page-community" class="page">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag">Real-Time Community · WebSockets</div>
+      <h2 class="section-title">Community <span style="color:var(--teal)">Chat &amp; Study Rooms</span></h2>
+      <p class="section-sub">Join your subject room, ask questions, share knowledge and connect with tutors in real time.</p>
+    </div>
+
+    <!-- Join Prompt -->
+    <div id="chat-login-prompt" style="max-width:480px;margin:0 auto 2rem">
+      <div class="form-container">
+        <div class="form-title">Join the Community</div>
+        <div class="form-sub">Enter your name or use your RMI ID to join the community rooms.</div>
+        <div class="form-group"><label class="form-label">Display Name</label>
+          <input class="form-input" id="chat-name-input" placeholder="Thabo Learner / RMI-STU-2025-0042" onkeydown="if(event.key==='Enter')joinChat()"/>
+        </div>
+        <button class="btn-primary" onclick="joinChat()" style="width:100%;padding:12px">Join Community Rooms →</button>
+      </div>
+    </div>
+
+    <!-- Chat area -->
+    <div id="chat-area" style="display:none">
+      <div id="chat-container">
+
+        <!-- SIDEBAR with subject rooms grouped by phase -->
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-title">Study Rooms</div>
+
+          <!-- General -->
+          <div class="chat-room-group">
+            <div class="chat-room-group-title">📢 General</div>
+            <div class="chat-room active" onclick="switchRoom('general',this)"><span class="chat-room-dot"></span># General Chat</div>
+            <div class="chat-room" onclick="switchRoom('announcements',this)"><span class="chat-room-dot" style="background:#eab308"></span># Announcements</div>
+            <div class="chat-room" onclick="switchRoom('innovation',this)"><span class="chat-room-dot" style="background:#a78bfa"></span># Innovation Hub</div>
+          </div>
+
+          <!-- Primary School -->
+          <div class="chat-room-group">
+            <div class="chat-room-group-title">🏫 Primary School</div>
+            <div class="chat-room" onclick="switchRoom('natural-sciences',this)"><span class="chat-room-dot" style="background:#22c55e"></span># Natural Sciences</div>
+            <div class="chat-room" onclick="switchRoom('technology-primary',this)"><span class="chat-room-dot" style="background:#f97316"></span># Technology</div>
+            <div class="chat-room" onclick="switchRoom('social-sciences',this)"><span class="chat-room-dot" style="background:#06b6d4"></span># Social Sciences</div>
+            <div class="chat-room" onclick="switchRoom('robotics-primary',this)"><span class="chat-room-dot" style="background:#8b5cf6"></span># Robotics (Primary)</div>
+            <div class="chat-room" onclick="switchRoom('coding-primary',this)"><span class="chat-room-dot" style="background:#ec4899"></span># Intro to Coding</div>
+          </div>
+
+          <!-- High School -->
+          <div class="chat-room-group">
+            <div class="chat-room-group-title">📚 High School</div>
+            <div class="chat-room" onclick="switchRoom('mathematics',this)"><span class="chat-room-dot" style="background:#3b82f6"></span># Mathematics</div>
+            <div class="chat-room" onclick="switchRoom('maths-lit',this)"><span class="chat-room-dot" style="background:#60a5fa"></span># Maths Literacy</div>
+            <div class="chat-room" onclick="switchRoom('physics',this)"><span class="chat-room-dot" style="background:#f59e0b"></span># Physics</div>
+            <div class="chat-room" onclick="switchRoom('chemistry',this)"><span class="chat-room-dot" style="background:#10b981"></span># Chemistry</div>
+            <div class="chat-room" onclick="switchRoom('life-sciences',this)"><span class="chat-room-dot" style="background:#84cc16"></span># Life Sciences</div>
+            <div class="chat-room" onclick="switchRoom('geography',this)"><span class="chat-room-dot" style="background:#14b8a6"></span># Geography</div>
+            <div class="chat-room" onclick="switchRoom('cat',this)"><span class="chat-room-dot" style="background:#6366f1"></span># CAT</div>
+            <div class="chat-room" onclick="switchRoom('computer-science-hs',this)"><span class="chat-room-dot" style="background:#8b5cf6"></span># Computer Science</div>
+            <div class="chat-room" onclick="switchRoom('python-hs',this)"><span class="chat-room-dot" style="background:var(--teal)"></span># Python Programming</div>
+            <div class="chat-room" onclick="switchRoom('robotics-hs',this)"><span class="chat-room-dot" style="background:#ec4899"></span># Robotics (HS)</div>
+            <div class="chat-room" onclick="switchRoom('cybersecurity-hs',this)"><span class="chat-room-dot" style="background:#ef4444"></span># Cybersecurity</div>
+          </div>
+
+          <!-- University -->
+          <div class="chat-room-group">
+            <div class="chat-room-group-title">🎓 University / College</div>
+            <div class="chat-room" onclick="switchRoom('data-science',this)"><span class="chat-room-dot" style="background:#f97316"></span># Data Science</div>
+            <div class="chat-room" onclick="switchRoom('ai-ml',this)"><span class="chat-room-dot" style="background:#a855f7"></span># AI &amp; Machine Learning</div>
+            <div class="chat-room" onclick="switchRoom('webdev',this)"><span class="chat-room-dot" style="background:#06b6d4"></span># Web Development</div>
+            <div class="chat-room" onclick="switchRoom('mobile-dev',this)"><span class="chat-room-dot" style="background:#84cc16"></span># Mobile Dev</div>
+            <div class="chat-room" onclick="switchRoom('computer-science-uni',this)"><span class="chat-room-dot" style="background:#3b82f6"></span># Computer Science (Uni)</div>
+            <div class="chat-room" onclick="switchRoom('robotics-uni',this)"><span class="chat-room-dot" style="background:#8b5cf6"></span># Robotics (Uni)</div>
+            <div class="chat-room" onclick="switchRoom('cybersecurity-uni',this)"><span class="chat-room-dot" style="background:#ef4444"></span># Ethical Hacking</div>
+          </div>
+
+          <div class="online-count" id="online-count">🟢 Connecting...</div>
+        </div>
+
+        <!-- MAIN CHAT AREA -->
+        <div class="chat-main">
+          <div class="chat-header">
+            <div>
+              <div class="chat-header-title" id="chat-room-title"># General Chat</div>
+              <div class="chat-header-sub" id="chat-room-phase">Royal Mercy Institute Community</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="openBookingFromChat()" style="padding:7px 14px;font-size:12px;font-weight:700;background:rgba(64,196,200,0.12);border:1px solid rgba(64,196,200,0.3);color:var(--teal);border-radius:8px;cursor:pointer;font-family:var(--font-body)">
+                📅 Book Session
+              </button>
+              <div class="chat-status"><span class="chat-status-dot"></span><span id="chat-status-text">Connected</span></div>
+            </div>
+          </div>
+          <div id="chat-messages"></div>
+          <div class="chat-input-area">
+            <input id="chat-input" type="text" placeholder="Ask a question, share knowledge..." onkeydown="if(event.key==='Enter')sendMessage()"/>
+            <button class="send-btn" onclick="sendMessage()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    <!-- ══ BOOK A LIVE SESSION ══ -->
+    <div style="margin-top:3rem">
+      <div class="section-header" style="margin-bottom:1.5rem">
+        <div class="section-tag">Live Sessions</div>
+        <h3 class="section-title" style="font-size:1.5rem">Book a <span style="color:var(--teal)">1-on-1 Video Session</span></h3>
+        <p class="section-sub">Choose your subject, pick a tutor, and select a time. Your session opens right here in the browser.</p>
+      </div>
+
+      <!-- Subject phase tabs -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem">
+        <button class="filter-btn active" id="bk-tab-all" onclick="setBookingPhase('all',this)">All Subjects</button>
+        <button class="filter-btn" id="bk-tab-primary" onclick="setBookingPhase('Primary School',this)">🏫 Primary School</button>
+        <button class="filter-btn" id="bk-tab-hs" onclick="setBookingPhase('High School',this)">📚 High School</button>
+        <button class="filter-btn" id="bk-tab-uni" onclick="setBookingPhase('University',this)">🎓 University</button>
+      </div>
+
+      <!-- Subject cards grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:2rem" id="booking-subjects-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
