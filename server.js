@@ -39,32 +39,32 @@ let users = [
 ];
 
 let courses = [
-  // ── PRIMARY SCHOOL ────────────────────────────────────────────────────────
-  { id: '1',  title: 'Natural Sciences (Gr 4-7)',              phase: 'Primary School',  category: 'Primary',          level: 'Beginner',     duration: '6 weeks',  instructor: 'Mohau Mokoena', enrolled: 83,  description: 'CAPS Natural Sciences: life, matter, energy, earth for intermediate phase.',                                   createdAt: new Date().toISOString() },
-  { id: '2',  title: 'Technology (Gr 4-9)',                    phase: 'Primary School',  category: 'Primary',          level: 'Beginner',     duration: '6 weeks',  instructor: 'Mohau Mokoena', enrolled: 69,  description: 'CAPS Technology: design, structures, systems for intermediate and senior phase.',                               createdAt: new Date().toISOString() },
-  { id: '3',  title: 'Social Sciences (Gr 4-7)',               phase: 'Primary School',  category: 'Primary',          level: 'Beginner',     duration: '6 weeks',  instructor: 'Mohau Mokoena', enrolled: 57,  description: 'History and Geography for intermediate phase. CAPS aligned.',                                                  createdAt: new Date().toISOString() },
-  { id: '4',  title: 'Robotics: Primary (Gr 4-7)',             phase: 'Primary School',  category: 'Robotics',         level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 44,  description: 'Block coding, computational thinking and robot building for primary learners.',                                  createdAt: new Date().toISOString() },
-  { id: '5',  title: 'Introduction to Coding (Gr 4-7)',        phase: 'Primary School',  category: 'Computer Science', level: 'Beginner',     duration: '6 weeks',  instructor: 'Mohau Mokoena', enrolled: 52,  description: 'Fun intro to Scratch, block coding and computational thinking for primary school learners.',                     createdAt: new Date().toISOString() },
-  // ── HIGH SCHOOL ───────────────────────────────────────────────────────────
-  { id: '6',  title: 'Mathematics (Gr 8-12)',                  phase: 'High School',     category: 'Mathematics',      level: 'Beginner',     duration: '12 weeks', instructor: 'Mohau Mokoena', enrolled: 118, description: 'CAPS Maths: algebra, calculus, trigonometry and statistics for Gr 8-12.',                                      createdAt: new Date().toISOString() },
-  { id: '7',  title: 'Mathematical Literacy (Gr 10-12)',       phase: 'High School',     category: 'Mathematics',      level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 93,  description: 'Practical maths for everyday life and careers. Gr 10-12 CAPS aligned.',                                         createdAt: new Date().toISOString() },
-  { id: '8',  title: 'Physical Sciences: Physics (Gr 10-12)', phase: 'High School',     category: 'Physical Sciences', level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 61,  description: 'CAPS Physics: mechanics, waves, electricity and magnetism for Gr 10-12.',                                       createdAt: new Date().toISOString() },
-  { id: '9',  title: 'Physical Sciences: Chemistry (Gr 10-12)',phase: 'High School',     category: 'Physical Sciences', level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 54,  description: 'CAPS Chemistry: atomic structure, equations, organic chemistry for Gr 10-12.',                                  createdAt: new Date().toISOString() },
-  { id: '10', title: 'Life Sciences (Gr 10-12)',               phase: 'High School',     category: 'Life Sciences',    level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 72,  description: 'CAPS Life Sciences: cells, genetics, evolution, biosphere for Gr 10-12.',                                       createdAt: new Date().toISOString() },
-  { id: '11', title: 'Geography (Gr 10-12)',                   phase: 'High School',     category: 'Geography',        level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 48,  description: 'CAPS Geography: climate, geomorphology, mapwork and development for Gr 10-12.',                                  createdAt: new Date().toISOString() },
-  { id: '12', title: 'Computer Applications Technology (CAT)', phase: 'High School',     category: 'CAT',              level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 76,  description: 'CAPS CAT: hardware, software, networking and data handling for Gr 10-12.',                                      createdAt: new Date().toISOString() },
-  { id: '13', title: 'Computer Science (Gr 10-12)',            phase: 'High School',     category: 'Computer Science', level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 65,  description: 'CAPS Computer Science: algorithms, programming (Delphi/Python), databases and networks for Gr 10-12.',          createdAt: new Date().toISOString() },
-  { id: '14', title: 'Robotics: High School (Gr 8-12)',        phase: 'High School',     category: 'Robotics',         level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 38,  description: 'Arduino, sensors, Python robotics and STEM projects for high school learners.',                                  createdAt: new Date().toISOString() },
-  { id: '15', title: 'Introduction to Python (Gr 8-12)',       phase: 'High School',     category: 'Programming',      level: 'Beginner',     duration: '6 weeks',  instructor: 'Mohau Mokoena', enrolled: 142, description: 'Learn Python from scratch with real SA curriculum alignment for high school learners.',                          createdAt: new Date().toISOString() },
-  { id: '16', title: 'Cybersecurity Essentials (Gr 10-12)',    phase: 'High School',     category: 'Cybersecurity',    level: 'Intermediate', duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 89,  description: 'Protect communities in the digital world — digital safety, ethical hacking intro, network security.',            createdAt: new Date().toISOString() },
-  // ── UNIVERSITY / COLLEGE ──────────────────────────────────────────────────
-  { id: '17', title: 'Data Science & Analytics',               phase: 'University',      category: 'Data Science',     level: 'Intermediate', duration: '10 weeks', instructor: 'Mohau Mokoena', enrolled: 67,  description: 'Python, Pandas, Matplotlib and statistical analysis for community data projects.',                               createdAt: new Date().toISOString() },
-  { id: '18', title: 'AI & Machine Learning',                  phase: 'University',      category: 'AI/ML',            level: 'Advanced',     duration: '14 weeks', instructor: 'Mohau Mokoena', enrolled: 34,  description: 'Machine learning, neural networks and African innovation challenges for university students.',                   createdAt: new Date().toISOString() },
-  { id: '19', title: 'Web Development Fundamentals',           phase: 'University',      category: 'Programming',      level: 'Beginner',     duration: '8 weeks',  instructor: 'Mohau Mokoena', enrolled: 98,  description: 'HTML, CSS, JavaScript and React fundamentals for SA youth and university students.',                             createdAt: new Date().toISOString() },
-  { id: '20', title: 'Mobile App Development',                 phase: 'University',      category: 'Programming',      level: 'Intermediate', duration: '12 weeks', instructor: 'Mohau Mokoena', enrolled: 55,  description: 'Build Android and iOS apps using Flutter and Dart.',                                                           createdAt: new Date().toISOString() },
-  { id: '21', title: 'Computer Science (University)',          phase: 'University',      category: 'Computer Science', level: 'Advanced',     duration: '16 weeks', instructor: 'Mohau Mokoena', enrolled: 41,  description: 'Algorithms, data structures, operating systems, databases and software engineering for university students.',    createdAt: new Date().toISOString() },
-  { id: '22', title: 'Robotics: University Level',             phase: 'University',      category: 'Robotics',         level: 'Advanced',     duration: '12 weeks', instructor: 'Mohau Mokoena', enrolled: 22,  description: 'ROS, computer vision, SLAM, autonomous systems and capstone project for university students.',                  createdAt: new Date().toISOString() },
-  { id: '23', title: 'Cybersecurity & Ethical Hacking',        phase: 'University',      category: 'Cybersecurity',    level: 'Advanced',     duration: '12 weeks', instructor: 'Mohau Mokoena', enrolled: 31,  description: 'Advanced cybersecurity: penetration testing, network defence, cryptography and ethical hacking.',                createdAt: new Date().toISOString() },
+  // PRIMARY SCHOOL
+  { id:'1',  phase:'Primary School', title:'Natural Sciences (Gr 4-7)',        category:'Natural Sciences', level:'Beginner',     duration:'6 weeks',  instructor:'Mohau Mokoena',enrolled:83, description:'CAPS Natural Sciences: life, matter, energy, earth for intermediate phase.', createdAt:new Date().toISOString()},
+  { id:'2',  phase:'Primary School', title:'Technology (Gr 4-9)',              category:'Technology',       level:'Beginner',     duration:'6 weeks',  instructor:'Mohau Mokoena',enrolled:69, description:'CAPS Technology: design, structures, systems for intermediate and senior phase.', createdAt:new Date().toISOString()},
+  { id:'3',  phase:'Primary School', title:'Social Sciences (Gr 4-7)',         category:'Social Sciences',  level:'Beginner',     duration:'6 weeks',  instructor:'Mohau Mokoena',enrolled:57, description:'History and Geography for intermediate phase. CAPS aligned.', createdAt:new Date().toISOString()},
+  { id:'4',  phase:'Primary School', title:'Robotics: Primary (Gr 4-7)',       category:'Robotics',         level:'Beginner',     duration:'8 weeks',  instructor:'Mohau Mokoena',enrolled:44, description:'Block coding, computational thinking and robot building for primary learners.', createdAt:new Date().toISOString()},
+  { id:'5',  phase:'Primary School', title:'Introduction to Coding (Gr 4-7)',  category:'Computer Science', level:'Beginner',     duration:'6 weeks',  instructor:'Mohau Mokoena',enrolled:52, description:'Scratch, block coding and computational thinking for primary school learners.', createdAt:new Date().toISOString()},
+  // HIGH SCHOOL
+  { id:'6',  phase:'High School',    title:'Mathematics (Gr 8-12)',            category:'Mathematics',      level:'Beginner',     duration:'12 weeks', instructor:'Mohau Mokoena',enrolled:118,description:'CAPS Maths: algebra, calculus, trigonometry and statistics for Gr 8-12.', createdAt:new Date().toISOString()},
+  { id:'7',  phase:'High School',    title:'Mathematical Literacy (Gr 10-12)', category:'Mathematics',      level:'Beginner',     duration:'8 weeks',  instructor:'Mohau Mokoena',enrolled:93, description:'Practical maths for everyday life and careers. Gr 10-12 CAPS aligned.', createdAt:new Date().toISOString()},
+  { id:'8',  phase:'High School',    title:'Physical Sciences: Physics',       category:'Physical Sciences',level:'Intermediate', duration:'10 weeks', instructor:'Mohau Mokoena',enrolled:61, description:'CAPS Physics: mechanics, waves, electricity and magnetism for Gr 10-12.', createdAt:new Date().toISOString()},
+  { id:'9',  phase:'High School',    title:'Physical Sciences: Chemistry',     category:'Physical Sciences',level:'Intermediate', duration:'10 weeks', instructor:'Mohau Mokoena',enrolled:54, description:'CAPS Chemistry: atomic structure, equations, organic chemistry for Gr 10-12.', createdAt:new Date().toISOString()},
+  { id:'10', phase:'High School',    title:'Life Sciences (Gr 10-12)',         category:'Life Sciences',    level:'Intermediate', duration:'10 weeks', instructor:'Mohau Mokoena',enrolled:72, description:'CAPS Life Sciences: cells, genetics, evolution, biosphere for Gr 10-12.', createdAt:new Date().toISOString()},
+  { id:'11', phase:'High School',    title:'Geography (Gr 10-12)',             category:'Geography',        level:'Beginner',     duration:'8 weeks',  instructor:'Mohau Mokoena',enrolled:48, description:'CAPS Geography: climate, geomorphology, mapwork and development for Gr 10-12.', createdAt:new Date().toISOString()},
+  { id:'12', phase:'High School',    title:'Computer Applications Technology', category:'CAT',              level:'Beginner',     duration:'8 weeks',  instructor:'Mohau Mokoena',enrolled:76, description:'CAPS CAT: hardware, software, networking and data handling for Gr 10-12.', createdAt:new Date().toISOString()},
+  { id:'13', phase:'High School',    title:'Computer Science (Gr 10-12)',      category:'Computer Science', level:'Intermediate', duration:'10 weeks', instructor:'Mohau Mokoena',enrolled:65, description:'CAPS Computer Science: algorithms, programming, databases and networks for Gr 10-12.', createdAt:new Date().toISOString()},
+  { id:'14', phase:'High School',    title:'Robotics: High School (Gr 8-12)', category:'Robotics',         level:'Intermediate', duration:'10 weeks', instructor:'Mohau Mokoena',enrolled:38, description:'Arduino, sensors, Python robotics and STEM projects for high school learners.', createdAt:new Date().toISOString()},
+  { id:'15', phase:'High School',    title:'Introduction to Python',           category:'Programming',      level:'Beginner',     duration:'6 weeks',  instructor:'Mohau Mokoena',enrolled:142,description:'Learn Python from scratch with real SA curriculum alignment.', createdAt:new Date().toISOString()},
+  { id:'16', phase:'High School',    title:'Cybersecurity Essentials',         category:'Cybersecurity',    level:'Intermediate', duration:'8 weeks',  instructor:'Mohau Mokoena',enrolled:89, description:'Digital safety, network security, and ethical hacking intro for Gr 10-12.', createdAt:new Date().toISOString()},
+  // UNIVERSITY
+  { id:'17', phase:'University',     title:'Data Science & Analytics',         category:'Data Science',     level:'Intermediate', duration:'10 weeks', instructor:'Mohau Mokoena',enrolled:67, description:'Python, Pandas, Matplotlib and statistical analysis for university students.', createdAt:new Date().toISOString()},
+  { id:'18', phase:'University',     title:'AI & Machine Learning',            category:'AI/ML',            level:'Advanced',     duration:'14 weeks', instructor:'Mohau Mokoena',enrolled:34, description:'Machine learning, neural networks and African innovation challenges.', createdAt:new Date().toISOString()},
+  { id:'19', phase:'University',     title:'Web Development Fundamentals',     category:'Web Dev',          level:'Beginner',     duration:'8 weeks',  instructor:'Mohau Mokoena',enrolled:98, description:'HTML, CSS, JavaScript and React for SA youth and university students.', createdAt:new Date().toISOString()},
+  { id:'20', phase:'University',     title:'Mobile App Development',           category:'Mobile',           level:'Intermediate', duration:'12 weeks', instructor:'Mohau Mokoena',enrolled:55, description:'Build Android and iOS apps using Flutter and Dart.', createdAt:new Date().toISOString()},
+  { id:'21', phase:'University',     title:'Computer Science (University)',     category:'Computer Science', level:'Advanced',     duration:'16 weeks', instructor:'Mohau Mokoena',enrolled:41, description:'Algorithms, data structures, operating systems, databases for university students.', createdAt:new Date().toISOString()},
+  { id:'22', phase:'University',     title:'Robotics: University Level',       category:'Robotics',         level:'Advanced',     duration:'12 weeks', instructor:'Mohau Mokoena',enrolled:22, description:'ROS, computer vision, SLAM, autonomous systems for university students.', createdAt:new Date().toISOString()},
+  { id:'23', phase:'University',     title:'Cybersecurity & Ethical Hacking',  category:'Cybersecurity',    level:'Advanced',     duration:'12 weeks', instructor:'Mohau Mokoena',enrolled:31, description:'Advanced penetration testing, network defence, cryptography and ethical hacking.', createdAt:new Date().toISOString()},
 ];
 
 let messages = [];
@@ -105,12 +105,11 @@ app.post('/api/auth/signup', async (req, res) => {
     const year = new Date().getFullYear();
     const idNum = String(nextId.users).padStart(4,'0');
     const prefix = assignedRole === 'tutor' ? 'RMI-TUT' : assignedRole === 'admin' ? 'RMI-ADM' : 'RMI-STU';
-    const rmiId  = `${prefix}-${year}-${idNum}`;
-    const approved = assignedRole === 'learner' || assignedRole === 'admin' ? true : false;
-    const user = { id: String(nextId.users++), name, email, password: hashedPassword, role: assignedRole, rmiId, phone: phone||'', qualification: qualification||'', approved, createdAt: new Date().toISOString() };
+    const rmiId = prefix + '-' + year + '-' + idNum;
+    const user = { id: String(nextId.users++), name, email, password: hashedPassword, role: assignedRole, rmiId, phone, qualification, createdAt: new Date().toISOString() };
     users.push(user);
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name }, JWT_SECRET, { expiresIn: '24h' });
-    res.status(201).json({ message: 'Account created successfully!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role, rmiId: user.rmiId, approved: user.approved } });
+    res.status(201).json({ message: 'Account created successfully!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role, rmiId: user.rmiId } });
   } catch (err) {
     res.status(500).json({ error: 'Server error during signup.' });
   }
@@ -125,7 +124,7 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ error: 'Invalid email or password.' });
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name }, JWT_SECRET, { expiresIn: '24h' });
-    res.json({ message: 'Login successful!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role, rmiId: user.rmiId, approved: user.approved } });
+    res.json({ message: 'Login successful!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role, rmiId: user.rmiId } });
   } catch {
     res.status(500).json({ error: 'Server error during login.' });
   }
@@ -196,46 +195,7 @@ app.delete('/api/users/:id', authMiddleware, adminOnly, (req, res) => {
   res.json({ message: 'User deleted.' });
 });
 
-
-// ── Payment Recording ──────────────────────────────
-let payments = [];
-
-app.post('/api/payments', authMiddleware, (req, res) => {
-  const { plan, amount, method, courseIds } = req.body;
-  const payment = {
-    id: Date.now().toString(),
-    userId:  req.user.id,
-    rmiId:   users.find(u => u.id === req.user.id)?.rmiId || '',
-    plan, amount, method,
-    courseIds: courseIds || [],
-    status: 'completed',
-    createdAt: new Date().toISOString()
-  };
-  payments.push(payment);
-  // Mark user as having active subscription
-  const user = users.find(u => u.id === req.user.id);
-  if (user) { user.subscription = { plan, amount, activeSince: payment.createdAt }; }
-  res.status(201).json({ message: 'Payment recorded.', payment });
-});
-
-app.get('/api/payments', authMiddleware, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.json(payments.filter(p => p.userId === req.user.id));
-  }
-  res.json(payments); // Admin sees all
-});
-
-// ── Educator approval (admin only) ─────────────────
-app.put('/api/users/:id/approve', authMiddleware, (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only.' });
-  const user = users.find(u => u.id === req.params.id);
-  if (!user) return res.status(404).json({ error: 'User not found.' });
-  user.approved = true;
-  res.json({ message: 'Educator approved.', user: { id: user.id, name: user.name, rmiId: user.rmiId, role: user.role, approved: user.approved } });
-});
-
-// ── Stats (updated) ────────────────────────────────
-
+// ── Stats endpoint ─────────────────────────────────────────────
 app.get('/api/stats', (req, res) => {
   res.json({
     totalCourses: courses.length,
@@ -290,6 +250,11 @@ io.on('connection', (socket) => {
       io.to(user.room).emit('userLeft', { name: user.name, count: [...onlineUsers.values()].filter(u => u.room === user.room).length });
     }
   });
+});
+
+// Catch-all: serve index.html for any non-API route
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 server.listen(PORT, () => console.log(`RMI Server running on http://localhost:${PORT}`));
